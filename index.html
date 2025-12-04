@@ -87,6 +87,8 @@
 
       const box = document.getElementById("choices");
       box.innerHTML = "";
+      box.style.display = "grid";
+
       currentQuiz.choices.forEach(name => {
         const btn = document.createElement("button");
         btn.textContent = name;
@@ -94,7 +96,7 @@
         btn.style.borderRadius = "8px";
         btn.style.background = "#007aff";
         btn.style.color = "white";
-        btn.onclick = () => selectCountry(name, btn)(name);
+        btn.onclick = () => selectCountry(name, btn);
         box.appendChild(btn);
       });
 
@@ -107,7 +109,6 @@
     function selectCountry(name, btn) {
       if (userAnswers.length >= 3) return;
 
-      // 選択状態にして無効化
       btn.style.background = '#ccc';
       btn.style.color = '#666';
       btn.disabled = true;
@@ -123,10 +124,6 @@
         checkBtn.disabled = false;
         checkBtn.style.background = "#28a745";
       }
-    }) {
-        checkBtn.disabled = false;
-        checkBtn.style.background = "#28a745";
-      }
     }
 
     function resetAnswers() {
@@ -138,6 +135,7 @@
         checkBtn.disabled = true;
         checkBtn.style.background = "#aaa";
       }
+      document.getElementById('choices').style.display = 'grid';
     }
 
     function checkAnswer() {
@@ -145,10 +143,8 @@
 
       const correct = currentQuiz.answer;
 
-      // 選択肢を非表示
       document.getElementById('choices').style.display = 'none';
 
-      // 結果表示領域
       const resultBox = document.createElement('div');
       resultBox.id = 'result';
       resultBox.style.marginTop = '20px';
@@ -166,7 +162,6 @@
 
       resultBox.innerHTML = html;
 
-      // choices の場所に結果を出す
       const card = document.querySelector('.card');
       card.insertBefore(resultBox, document.getElementById('answers').parentElement);
     }
@@ -175,3 +170,4 @@
   </script>
 </body>
 </html>
+
