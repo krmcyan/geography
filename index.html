@@ -16,13 +16,13 @@
 </head>
 <body>
   <div class="card">
-    <h1 id="quiz-title">地理統計クイズ</h1>
+    <h1 id="quiz-title">●●の輸出量ランキング</h1>
 
     <p id="instruction">1位 → 2位 → 3位 の順で国を選んでください</p>
 
     <div id="choices"><!-- 選択肢10個が入る --></div>
 
-    <div style="margin-top: 20px;">
+    <div id="answerBlock" style="margin-top: 20px; display:none;">
       <strong>あなたの回答:</strong>
       <ol id="answers"></ol>
     </div>
@@ -34,8 +34,8 @@
   <script>
     // --- データ ---
     const quizData = [
-      { title: "小麦の生産量(2023)", choices: ["中国","インド","ロシア","アメリカ","オーストラリア","フランス","カナダ","パキスタン","トルコ","ウクライナ"], answer: ["中国","インド","ロシア"] },
-      { title: "米の生産量(2023)", choices: ["インド","中国","バングラデシュ","インドネシア","ベトナム","タイ","ミャンマー","フィリピン","パキスタン","アメリカ"], answer: ["インド","中国","バングラデシュ"] }
+      { title: "小麦の輸出量", choices: ["アメリカ","カナダ","フランス","オーストラリア","ロシア","アルゼンチン","ウクライナ","インド","ドイツ","中国"], answer: ["ロシア","カナダ","アメリカ"] },
+      { title: "石油の生産量", choices: ["アメリカ","サウジアラビア","ロシア","カナダ","イラク","UAE","中国","イラン","ブラジル","クウェート"], answer: ["アメリカ","サウジアラビア","ロシア"] }
     ];
 
     // --- 変数 ---
@@ -66,7 +66,7 @@
 
       // 問題選択
       currentQuiz = quizData[Math.floor(Math.random() * quizData.length)];
-      document.getElementById('quiz-title').textContent = currentQuiz.title;
+      document.getElementById('quiz-title').textContent = currentQuiz.title + ' ランキング';
 
       // 選択肢をシャッフルして作る
       const shuffled = shuffleArray(currentQuiz.choices);
@@ -93,6 +93,7 @@
       const checkBtn = document.getElementById('checkBtn');
       checkBtn.style.display = 'block';
       checkBtn.disabled = true;
+        document.getElementById('answerBlock').style.display = 'none';
       checkBtn.style.display = 'block';
       checkBtn.style.background = '#aaa';
 
@@ -120,6 +121,7 @@
       }
 
       // 回答リスト更新
+      document.getElementById('answerBlock').style.display = (userAnswers.length > 0 ? 'block' : 'none');
       const list = document.getElementById('answers');
       list.innerHTML = '';
       userAnswers.forEach(a => {
@@ -132,6 +134,7 @@
       const checkBtn = document.getElementById('checkBtn');
       if (userAnswers.length === 3) {
         checkBtn.disabled = false;
+        document.getElementById('answerBlock').style.display = 'block';
         checkBtn.style.background = '#28a745';
       } else {
         checkBtn.disabled = true;
@@ -145,6 +148,7 @@
       const correct = currentQuiz.answer;
 
       // 選択肢を非表示にする
+      document.getElementById('answerBlock').style.display = 'block';
       document.getElementById('choices').style.display = 'none';
 
       // 確定ボタンは消す
