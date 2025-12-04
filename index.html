@@ -22,7 +22,7 @@
 
     <div id="choices"><!-- 選択肢10個が入る --></div>
 
-    <div id="answerBlock" style="margin-top: 20px; display:none;">
+    <div id="answerBlock" style="margin-top: 20px; display:block;">
       <strong>あなたの回答:</strong>
       <ol id="answers"></ol>
     </div>
@@ -93,7 +93,6 @@
       const checkBtn = document.getElementById('checkBtn');
       checkBtn.style.display = 'block';
       checkBtn.disabled = true;
-        document.getElementById('answerBlock').style.display = 'none';
       checkBtn.style.display = 'block';
       checkBtn.style.background = '#aaa';
 
@@ -121,7 +120,7 @@
       }
 
       // 回答リスト更新
-      document.getElementById('answerBlock').style.display = (userAnswers.length > 0 ? 'block' : 'none');
+      
       const list = document.getElementById('answers');
       list.innerHTML = '';
       userAnswers.forEach(a => {
@@ -134,7 +133,6 @@
       const checkBtn = document.getElementById('checkBtn');
       if (userAnswers.length === 3) {
         checkBtn.disabled = false;
-        document.getElementById('answerBlock').style.display = 'block';
         checkBtn.style.background = '#28a745';
       } else {
         checkBtn.disabled = true;
@@ -148,7 +146,7 @@
       const correct = currentQuiz.answer;
 
       // 選択肢を非表示にする
-      document.getElementById('answerBlock').style.display = 'block';
+      document.getElementById('answerBlock').style.display = 'none';
       document.getElementById('choices').style.display = 'none';
 
       // 確定ボタンは消す
