@@ -44,24 +44,78 @@
 </head>
 <body>
   <div class="card">
-    <h1>地理統計クイズ</h1>
-    <div id="question">▶ ボタンを押して問題を出す</div>
-    <input id="answer" type="text" placeholder="答えを入力" style="width: 100%; padding: 8px; font-size: 1rem; margin-top: 12px; border-radius: 6px; border: 1px solid #ccc;">
+    <h1 id="quiz-title">●●の輸出量ランキング</h1>
+
+    <p id="instruction">1位 → 2位 → 3位 の順で国を選んでください</p>
+
+    <div id="choices" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+      <!-- 選択肢10個が入る -->
+    </div>
+
+    <div style="margin-top: 20px;">
+      <strong>あなたの回答:</strong>
+      <ol id="answers"></ol>
+    </div>
+
     <button onclick="newQuiz()">新しい問題</button>
+    <button onclick="resetAnswers()" style="background:#555; margin-top:10px;">リセット</button>
   </div>
 
   <script>
-    const quizList = [
-      "面積が世界1位の国は？",
-      "人口が世界1位の国は？",
-      "GDPが世界1位の国は？",
-      "コーヒー生産量1位の国は？",
-      "原油生産量1位の国は？"
+    // サンプル問題データ
+    const quizData = [
+      {
+        title: "小麦の輸出量",
+        choices: ["アメリカ", "カナダ", "フランス", "オーストラリア", "ロシア", "アルゼンチン", "ウクライナ", "インド", "ドイツ", "中国"],
+        answer: ["ロシア", "カナダ", "アメリカ"]
+      },
+      {
+        title: "石油の生産量",
+        choices: ["アメリカ", "サウジアラビア", "ロシア", "カナダ", "イラク", "UAE", "中国", "イラン", "ブラジル", "クウェート"],
+        answer: ["アメリカ", "サウジアラビア", "ロシア"]
+      }
     ];
+
+    let currentQuiz;
+    let userAnswers = [];
+
     function newQuiz() {
-      const q = quizList[Math.floor(Math.random()*quizList.length)];
-      document.getElementById('question').textContent = q;
+      currentQuiz = quizData[Math.floor(Math.random() * quizData.length)];
+      document.getElementById("quiz-title").textContent = currentQuiz.title + " ランキング";
+
+      // 選択肢生成
+      const box = document.getElementById("choices");
+      box.innerHTML = "";
+      currentQuiz.choices.forEach(name => {
+        const btn = document.createElement("button");
+        btn.textContent = name;
+        btn.style.padding = "10px";
+        btn.style.borderRadius = "8px";
+        btn.onclick = () => selectCountry(name);
+        box.appendChild(btn);
+      });
+
+      resetAnswers();
     }
+
+    function selectCountry(name) {
+      if (userAnswers.length >= 3) return;
+
+      userAnswers.push(name);
+
+      const list = document.getElementById("answers");
+      const item = document.createElement("li");
+      item.textContent = name;
+      list.appendChild(item);
+    }
+
+    function resetAnswers() {
+      userAnswers = [];
+      document.getElementById("answers").innerHTML = "";
+    }
+
+    // 最初の問題
+    newQuiz();
   </script>
 </body>
 </html>
