@@ -57,6 +57,7 @@
       <ol id="answers"></ol>
     </div>
 
+    <button id="checkBtn" onclick="checkAnswer()" style="background:#aaa; margin-bottom:15px; width:100%; padding:14px; border:none; border-radius:8px; font-size:1.1rem;" disabled>確定</button>
     <button onclick="newQuiz()">新しい問題</button>
     <button onclick="resetAnswers()" style="background:#555; margin-top:10px;">リセット</button>
   </div>
@@ -78,12 +79,12 @@
 
     let currentQuiz;
     let userAnswers = [];
+    let checkBtn;
 
     function newQuiz() {
       currentQuiz = quizData[Math.floor(Math.random() * quizData.length)];
       document.getElementById("quiz-title").textContent = currentQuiz.title + " ランキング";
 
-      // 選択肢生成
       const box = document.getElementById("choices");
       box.innerHTML = "";
       currentQuiz.choices.forEach(name => {
@@ -91,11 +92,16 @@
         btn.textContent = name;
         btn.style.padding = "10px";
         btn.style.borderRadius = "8px";
+        btn.style.background = "#007aff";
+        btn.style.color = "white";
         btn.onclick = () => selectCountry(name);
         box.appendChild(btn);
       });
 
       resetAnswers();
+      checkBtn = document.getElementById("checkBtn");
+      checkBtn.disabled = true;
+      checkBtn.style.background = "#aaa";
     }
 
     function selectCountry(name) {
@@ -107,14 +113,46 @@
       const item = document.createElement("li");
       item.textContent = name;
       list.appendChild(item);
+
+      if (userAnswers.length === 3) {
+        checkBtn.disabled = false;
+        checkBtn.style.background = "#28a745";
+      }
     }
 
     function resetAnswers() {
       userAnswers = [];
       document.getElementById("answers").innerHTML = "";
+      const old = document.getElementById("result");
+      if (old) old.remove();
+      if (checkBtn) {
+        checkBtn.disabled = true;
+        checkBtn.style.background = "#aaa";
+      }
     }
 
-    // 最初の問題
+    function checkAnswer() {
+      if (userAnswers.length < 3) return;
+
+      const correct = currentQuiz.answer;
+      const resultBox = document.createElement('div');
+      resultBox.id = 'result';
+      resultBox.style.marginTop = '20px';
+      resultBox.style.padding = '10px';
+      resultBox.style.background = '#eef';
+      resultBox.style.borderRadius = '8px';
+
+      let html = "<strong>結果:</strong><br><br>";
+      for (let i = 0; i < 3; i++) {
+        const ok = (userAnswers[i] === correct[i]);
+        const color = ok ? '#28a745' : '#d00';
+        html += `${i+1}位 → <span style='color:${color}'>あなた: ${userAnswers[i]}</span> / 正解: ${correct[i]}<br>`;
+      }
+
+      resultBox.innerHTML = html;
+      document.querySelector('.card').appendChild(resultBox);
+    }
+
     newQuiz();
   </script>
 </body>
