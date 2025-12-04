@@ -1,48 +1,96 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>地理統計クイズ</title>
+<style>
+  body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: #f4f4f8;
+  }
+  .card {
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    max-width: 500px;
+    margin: auto;
+  }
+  h1 {
+    font-size: 24px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  #question {
+    font-size: 20px;
+    margin-bottom: 15px;
+    line-height: 1.5;
+  }
+  input {
+    width: 100%;
+    padding: 12px;
+    font-size: 18px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    margin-bottom: 15px;
+  }
+  button {
+    width: 100%;
+    padding: 12px;
+    font-size: 18px;
+    border: none;
+    background: #4a90e2;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  button:active {
+    background: #357ac8;
+  }
+  #result {
+    margin-top: 15px;
+    font-size: 18px;
+    text-align: center;
+  }
+</style>
 </head>
 <body>
-<h1>地理統計クイズ</h1>
-<div id="question" style="margin: 20px 0; font-size: 20px;"></div>
-
-<input id="answer" placeholder="答えを入力" style="font-size:18px;">
-<button onclick="check()" style="font-size:18px;">答える</button>
-
-<div id="result" style="margin-top:20px; font-size:18px;"></div>
+<div class="card">
+  <h1>地理統計クイズ</h1>
+  <div id="question"></div>
+  <input id="answer" placeholder="答えを入力" />
+  <button onclick="check()">答える</button>
+  <div id="result"></div>
+</div>
 
 <script>
-// ここに問題を追加していくだけ！
 const data = [
   {q:"世界の人口第1位の国は？", a:"中国"},
   {q:"ブラジルの主要輸出品は？", a:"鉄鉱石"},
   {q:"世界三大穀物に含まれないものは？", a:"大豆"},
   {q:"日本の漁獲量が特に多い魚は？", a:"サンマ"}
 ];
-
 let current;
-
-// 次の問題を出す
 function next(){
   current = data[Math.floor(Math.random()*data.length)];
   document.getElementById("question").innerText = current.q;
   document.getElementById("answer").value = "";
   document.getElementById("result").innerText = "";
 }
-
-// 答え合わせ
 function check(){
   const ans = document.getElementById("answer").value.trim();
   if(ans === current.a){
     document.getElementById("result").innerText = "正解！";
+    document.getElementById("result").style.color = "#1a8f3c";
   } else {
-    document.getElementById("result").innerText = "不正解：正解は「" + current.a + "」";
+    document.getElementById("result").innerText = "不正解：正解は『" + current.a + "』";
+    document.getElementById("result").style.color = "#c0392b";
   }
   setTimeout(next, 1500);
 }
-
 next();
 </script>
 </body>
