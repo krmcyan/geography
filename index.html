@@ -94,7 +94,7 @@
         btn.style.borderRadius = "8px";
         btn.style.background = "#007aff";
         btn.style.color = "white";
-        btn.onclick = () => selectCountry(name);
+        btn.onclick = () => selectCountry(name, btn)(name);
         box.appendChild(btn);
       });
 
@@ -104,8 +104,13 @@
       checkBtn.style.background = "#aaa";
     }
 
-    function selectCountry(name) {
+    function selectCountry(name, btn) {
       if (userAnswers.length >= 3) return;
+
+      // 選択状態にして無効化
+      btn.style.background = '#ccc';
+      btn.style.color = '#666';
+      btn.disabled = true;
 
       userAnswers.push(name);
 
@@ -115,6 +120,10 @@
       list.appendChild(item);
 
       if (userAnswers.length === 3) {
+        checkBtn.disabled = false;
+        checkBtn.style.background = "#28a745";
+      }
+    }) {
         checkBtn.disabled = false;
         checkBtn.style.background = "#28a745";
       }
@@ -135,6 +144,11 @@
       if (userAnswers.length < 3) return;
 
       const correct = currentQuiz.answer;
+
+      // 選択肢を非表示
+      document.getElementById('choices').style.display = 'none';
+
+      // 結果表示領域
       const resultBox = document.createElement('div');
       resultBox.id = 'result';
       resultBox.style.marginTop = '20px';
@@ -145,12 +159,16 @@
       let html = "<strong>結果:</strong><br><br>";
       for (let i = 0; i < 3; i++) {
         const ok = (userAnswers[i] === correct[i]);
+        const icon = ok ? '⭕' : '❌';
         const color = ok ? '#28a745' : '#d00';
-        html += `${i+1}位 → <span style='color:${color}'>あなた: ${userAnswers[i]}</span> / 正解: ${correct[i]}<br>`;
+        html += `${icon} ${i+1}位 → <span style='color:${color}'>あなた: ${userAnswers[i]}</span> / 正解: ${correct[i]}<br>`;
       }
 
       resultBox.innerHTML = html;
-      document.querySelector('.card').appendChild(resultBox);
+
+      // choices の場所に結果を出す
+      const card = document.querySelector('.card');
+      card.insertBefore(resultBox, document.getElementById('answers').parentElement);
     }
 
     newQuiz();
