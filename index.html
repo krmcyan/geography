@@ -82,14 +82,46 @@
     let newBtn;
 
     function newQuiz() {
+      // 前の判定を削除
+      const old = document.getElementById("result");
+      if (old) old.remove();
+
       currentQuiz = quizData[Math.floor(Math.random() * quizData.length)];
       document.getElementById("quiz-title").textContent = currentQuiz.title + " ランキング";
+
+      // 選択肢をランダムにシャッフル
+      const shuffled = [...currentQuiz.choices]
+        .map(v => ({ v, r: Math.random() }))
+        .sort((a, b) => a.r - b.r)
+        .map(obj => obj.v);
 
       const box = document.getElementById("choices");
       box.innerHTML = "";
       box.style.display = "grid";
 
       selectedButtons = {};
+
+      shuffled.forEach(name => {
+        const btn = document.createElement("button");
+        btn.textContent = name;
+        btn.style.padding = "10px";
+        btn.style.borderRadius = "8px";
+        btn.style.background = "#007aff";
+        btn.style.color = "white";
+        btn.onclick = () => toggleSelect(name, btn);
+        box.appendChild(btn);
+      });
+
+      userAnswers = [];
+      document.getElementById("answers").innerHTML = "";
+
+      checkBtn = document.getElementById("checkBtn");
+      checkBtn.style.display = "block";
+      checkBtn.disabled = true;
+      checkBtn.style.background = "#aaa";
+
+      document.querySelector("#newQuizBtn").style.display = "none";
+    };
 
       currentQuiz.choices.forEach(name => {
         const btn = document.createElement("button");
@@ -190,3 +222,4 @@
   </script>
 </body>
 </html>
+
