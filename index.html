@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>地理統計クイズ</title>
+</head>
+<body>
+<h1>地理統計クイズ</h1>
+<div id="question" style="margin: 20px 0; font-size: 20px;"></div>
+
+<input id="answer" placeholder="答えを入力" style="font-size:18px;">
+<button onclick="check()" style="font-size:18px;">答える</button>
+
+<div id="result" style="margin-top:20px; font-size:18px;"></div>
+
+<script>
+// ここに問題を追加していくだけ！
+const data = [
+  {q:"世界の人口第1位の国は？", a:"中国"},
+  {q:"ブラジルの主要輸出品は？", a:"鉄鉱石"},
+  {q:"世界三大穀物に含まれないものは？", a:"大豆"},
+  {q:"日本の漁獲量が特に多い魚は？", a:"サンマ"}
+];
+
+let current;
+
+// 次の問題を出す
+function next(){
+  current = data[Math.floor(Math.random()*data.length)];
+  document.getElementById("question").innerText = current.q;
+  document.getElementById("answer").value = "";
+  document.getElementById("result").innerText = "";
+}
+
+// 答え合わせ
+function check(){
+  const ans = document.getElementById("answer").value.trim();
+  if(ans === current.a){
+    document.getElementById("result").innerText = "正解！";
+  } else {
+    document.getElementById("result").innerText = "不正解：正解は「" + current.a + "」";
+  }
+  setTimeout(next, 1500);
+}
+
+next();
+</script>
+</body>
+</html>
