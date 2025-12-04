@@ -63,23 +63,24 @@
   </div>
 
   <script>
-    // サンプル問題データ
     const quizData = [
       {
         title: "小麦の輸出量",
-        choices: ["アメリカ", "カナダ", "フランス", "オーストラリア", "ロシア", "アルゼンチン", "ウクライナ", "インド", "ドイツ", "中国"],
-        answer: ["ロシア", "カナダ", "アメリカ"]
+        choices: ["アメリカ","カナダ","フランス","オーストラリア","ロシア","アルゼンチン","ウクライナ","インド","ドイツ","中国"],
+        answer: ["ロシア","カナダ","アメリカ"]
       },
       {
         title: "石油の生産量",
-        choices: ["アメリカ", "サウジアラビア", "ロシア", "カナダ", "イラク", "UAE", "中国", "イラン", "ブラジル", "クウェート"],
-        answer: ["アメリカ", "サウジアラビア", "ロシア"]
+        choices: ["アメリカ","サウジアラビア","ロシア","カナダ","イラク","UAE","中国","イラン","ブラジル","クウェート"],
+        answer: ["アメリカ","サウジアラビア","ロシア"]
       }
     ];
 
     let currentQuiz;
     let userAnswers = [];
+    let selectedButtons = {};
     let checkBtn;
+    let newBtn;
 
     function newQuiz() {
       currentQuiz = quizData[Math.floor(Math.random() * quizData.length)];
@@ -89,6 +90,8 @@
       box.innerHTML = "";
       box.style.display = "grid";
 
+      selectedButtons = {};
+
       currentQuiz.choices.forEach(name => {
         const btn = document.createElement("button");
         btn.textContent = name;
@@ -96,54 +99,72 @@
         btn.style.borderRadius = "8px";
         btn.style.background = "#007aff";
         btn.style.color = "white";
-        btn.onclick = () => selectCountry(name, btn);
+        btn.onclick = () => toggleSelect(name, btn);
         box.appendChild(btn);
       });
 
-      resetAnswers();
+      userAnswers = [];
+      document.getElementById("answers").innerHTML = "";
+
       checkBtn = document.getElementById("checkBtn");
+      checkBtn.style.display = "block";
       checkBtn.disabled = true;
       checkBtn.style.background = "#aaa";
+
+      document.querySelector("#newQuizBtn").style.display = "none";
     }
 
-    function selectCountry(name, btn) {
-      if (userAnswers.length >= 3) return;
+    function toggleSelect(name, btn) {
+      if (selectedButtons[name]) {
+        // 取り消し
+        selectedButtons[name] = false;
+        btn.style.background = "#007aff";
+        btn.style.color = "white";
+        btn.disabled = false;
 
-      btn.style.background = '#ccc';
-      btn.style.color = '#666';
-      btn.disabled = true;
+        const idx = userAnswers.indexOf(name);
+        if (idx !== -1) userAnswers.splice(idx, 1);
 
-      userAnswers.push(name);
+      } else {
+        if (userAnswers.length >= 3) return;
 
+        selectedButtons[name] = true;
+        btn.style.background = "#ccc";
+        btn.style.color = "#666";
+        btn.disabled = false;
+
+        userAnswers.push(name);
+      }
+
+      updateAnswerList();
+    }
+
+    function updateAnswerList() {
       const list = document.getElementById("answers");
-      const item = document.createElement("li");
-      item.textContent = name;
-      list.appendChild(item);
+      list.innerHTML = "";
+      userAnswers.forEach(a => {
+        const li = document.createElement("li");
+        li.textContent = a;
+        list.appendChild(li);
+      });
 
       if (userAnswers.length === 3) {
         checkBtn.disabled = false;
         checkBtn.style.background = "#28a745";
-      }
-    }
-
-    function resetAnswers() {
-      userAnswers = [];
-      document.getElementById("answers").innerHTML = "";
-      const old = document.getElementById("result");
-      if (old) old.remove();
-      if (checkBtn) {
+      } else {
         checkBtn.disabled = true;
         checkBtn.style.background = "#aaa";
       }
-      document.getElementById('choices').style.display = 'grid';
     }
 
     function checkAnswer() {
       if (userAnswers.length < 3) return;
-
       const correct = currentQuiz.answer;
 
       document.getElementById('choices').style.display = 'none';
+
+      checkBtn.style.display = 'none';
+      document.querySelector('#newQuizBtn').style.display = 'block';
 
       const resultBox = document.createElement('div');
       resultBox.id = 'result';
