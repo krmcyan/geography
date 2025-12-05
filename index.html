@@ -176,7 +176,6 @@
       document.getElementById('choices').style.display='none';
       document.getElementById('instruction').style.display='none';
       document.getElementById('checkBtn').style.display='none';
-      document.getElementById('newQuizBtn').style.display='block';
 
       let allCorrect=true;
       for(let i=0;i<3;i++){
@@ -211,6 +210,8 @@
         commentDiv.innerHTML=`<strong>ひとこと:</strong><br>${currentQuiz.comment}`;
         document.querySelector('.card').appendChild(commentDiv);
       }
+
+      document.getElementById('newQuizBtn').style.display='block';
     }
 
     document.querySelectorAll('.tab').forEach(tab=>{
