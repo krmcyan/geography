@@ -10,7 +10,8 @@ body { font-family: system-ui, sans-serif; margin:0; padding:20px; background:#f
 h1 { font-size:1.5rem; text-align:center; }
 
 .tabs { display:flex; justify-content:space-around; margin-bottom:15px; }
-.tab { flex:1; font-size:0.8rem; padding:8px; border:none; background:#99d7ff; border-radius:6px; text-align:center; }
+.tab { flex:1; padding:8px; border:none; background:#99d7ff; border-radius:6px; display:flex; justify-content:center; align-items:center; text-align:center; }
+.tab[data-genre="energy"] { font-size:0.7rem; }
 .tab.active { background:#007aff; color:white; }
 
 button.main { width:100%; padding:14px; margin-top:15px; font-size:1.1rem; border:none; border-radius:8px; background:#007aff; color:white; }
@@ -25,6 +26,7 @@ button.small { width:100%; padding:10px; margin-top:10px; font-size:1rem; border
 .result-box, .comment-box { margin-top:20px; padding:10px; border-radius:8px; background:#eef; }
 
 #answerBlock { margin-top:20px; display:block; }
+#instruction.hidden { display:none; }
 </style>
 </head>
 <body>
@@ -35,7 +37,7 @@ button.small { width:100%; padding:10px; margin-top:10px; font-size:1rem; border
     <div class="tab" data-genre="other">その他</div>
   </div>
 
-  <h1 id="quiz-title">●<span style="font-size:0.8em;">の</span>輸出量</h1>
+  <h1 id="quiz-title">小麦の輸出量</h1>
   <p id="instruction">1位 → 2位 → 3位 の順で国を選んでください</p>
   <div id="streak"></div>
   <div id="choices"></div>
@@ -95,19 +97,15 @@ const quizSets = {
   ]
 };
 
-let currentGenre = "agri";
-let currentQuiz = null;
-let userAnswers = [];
-let streak = 0;
+let currentGenre="agri", currentQuiz=null, userAnswers=[], streak=0;
 
 function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
-// ジャンル切替
 document.querySelectorAll('.tab').forEach(tab=>{
   tab.addEventListener('click',()=>{
     document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
     tab.classList.add('active');
-    currentGenre = tab.dataset.genre;
+    currentGenre=tab.dataset.genre;
     newQuiz();
   });
 });
@@ -126,9 +124,10 @@ function newQuiz(){
   document.getElementById('checkBtn').disabled=true;
   document.getElementById('checkBtn').style.background='#aaa';
   document.getElementById('newQuizBtn').style.display='none';
+  document.getElementById('instruction').classList.remove('hidden');
 
   currentQuiz = shuffle(quizSets[currentGenre])[0];
-  document.getElementById('quiz-title').innerHTML = currentQuiz.title.replace('の','●<span style="font-size:0.8em;">の</span>');
+  document.getElementById('quiz-title').textContent=currentQuiz.title;
 
   const box=document.getElementById('choices');
   box.innerHTML='';
@@ -143,7 +142,7 @@ function newQuiz(){
 
 function toggleSelect(name,btn){
   const idx=userAnswers.indexOf(name);
-  if(idx!==-1){userAnswers.splice(idx,1);btn.classList.remove('selected');}
+  if(idx!==-1){userAnswers.splice(idx,1); btn.classList.remove('selected');}
   else{if(userAnswers.length>=3) return; userAnswers.push(name); btn.classList.add('selected');}
 
   const list=document.getElementById('answers');
@@ -161,6 +160,7 @@ function checkAnswer(){
   document.getElementById('answerBlock').style.display='none';
   document.getElementById('choices').style.display='none';
   document.getElementById('checkBtn').style.display='none';
+  document.getElementById('instruction').classList.add('hidden');
   document.getElementById('newQuizBtn').style.display='block';
 
   let allCorrect=true;
@@ -178,13 +178,14 @@ function checkAnswer(){
     html+=`${icon} ${i+1}位 → <span style="color:${color}">あなた: ${userAnswers[i]||'-'} / 正解: ${correct[i]}</span><br>`;
   }
   result.innerHTML=html;
-  document.querySelector('.card').appendChild(result);
+  const card=document.querySelector('.card');
+  card.insertBefore(result, document.getElementById('newQuizBtn'));
 
   if(currentQuiz.comment && currentQuiz.comment.trim()!==''){
     const commentBox=document.createElement('div');
     commentBox.className='comment-box';
-    commentBox.textContent=currentQuiz.comment;
-    document.querySelector('.card').insertBefore(commentBox, document.getElementById('newQuizBtn'));
+    commentBox.textContent='ひとこと: '+currentQuiz.comment;
+    card.insertBefore(commentBox, document.getElementById('newQuizBtn'));
   }
 }
 
