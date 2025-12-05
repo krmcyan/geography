@@ -16,7 +16,7 @@
     /* --- ジャンルタブ --- */
     .tabs { display: flex; justify-content: space-around; margin-bottom: 15px; }
     .tab { flex: 1; font-size: 0.8rem; padding: 8px; border: none; background: #aad6f7; border-radius: 6px; text-align:center; display:flex; align-items:center; justify-content:center; }
-    .tab.energy { font-size:7px; }
+    .tab.energy { font-size:10px; }
     .tab.active { background: #007aff; color: white; }
 
     button.main { width: 100%; padding: 14px; margin-top: 15px; font-size: 1.1rem; border: none; border-radius: 8px; background: #007aff; color: white; }
@@ -55,7 +55,7 @@
     </div>
 
     <button id="checkBtn" class="main" onclick="checkAnswer()" style="background:#aaa;" disabled>確定</button>
-    <button id="newQuizBtn" class="small" onclick="newQuiz()" style="display:none; background:#28a745; color:white;">新しい問題</button>
+    <button id="newQuizBtn" class="small" onclick="newQuiz(true)" style="display:none; background:#28a745; color:white;">新しい問題</button>
   </div>
 
   <script>
@@ -79,6 +79,7 @@
     let userAnswers = [];
     let streak = 0;
     let currentQuizPerGenre = {};
+    let previousQuizPerGenre = {};
 
     function shuffle(arr) {
       const a = arr.slice();
@@ -94,7 +95,7 @@
       s.textContent = streak>=1?`🎯 ${streak}問連続正解！`:"";
     }
 
-    function newQuiz(init=false) {
+    function newQuiz(fromButton=false) {
       const old = document.getElementById('result');
       if(old) old.remove();
       const oldComment = document.getElementById('commentBlock');
@@ -110,14 +111,21 @@
       document.getElementById('checkBtn').style.display='block';
       document.getElementById('newQuizBtn').style.display='none';
 
-      if(!currentQuizPerGenre[currentGenre]){
-        const set = quizSets[currentGenre];
-        currentQuizPerGenre[currentGenre] = set[Math.floor(Math.random()*set.length)];
+      const set = quizSets[currentGenre];
+      let candidateSet = set.slice();
+
+      if(fromButton && previousQuizPerGenre[currentGenre]){
+        candidateSet = candidateSet.filter(q => q !== previousQuizPerGenre[currentGenre]);
+      }
+
+      if(!currentQuizPerGenre[currentGenre] || fromButton){
+        currentQuizPerGenre[currentGenre] = candidateSet[Math.floor(Math.random()*candidateSet.length)];
       }
 
       currentQuiz = currentQuizPerGenre[currentGenre];
+      previousQuizPerGenre[currentGenre] = currentQuiz;
       document.getElementById('quiz-title').innerHTML = currentQuiz.title.replace('の', '<span style="font-size:0.8em; vertical-align:bottom;">の</span>');
-      
+
       const box = document.getElementById('choices');
       box.innerHTML='';
       shuffle(currentQuiz.choices).forEach(name=>{
@@ -191,8 +199,7 @@
         html+=`${icon} ${i+1}位 → <span style='color:${color}'>あなた: ${userAnswers[i]||'-'} / 正解: ${correct[i]}</span><br>`;
       }
       result.innerHTML=html;
-      const card=document.querySelector('.card');
-      card.appendChild(result);
+      document.querySelector('.card').appendChild(result);
 
       if(currentQuiz.comment && currentQuiz.comment.trim()!==""){
         const commentDiv=document.createElement('div');
@@ -202,7 +209,7 @@
         commentDiv.style.padding='10px';
         commentDiv.style.borderRadius='8px';
         commentDiv.innerHTML=`<strong>ひとこと:</strong><br>${currentQuiz.comment}`;
-        card.appendChild(commentDiv);
+        document.querySelector('.card').appendChild(commentDiv);
       }
     }
 
