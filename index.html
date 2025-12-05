@@ -26,7 +26,6 @@
 </head>
 <body>
 
-  <!-- ▼ バージョン表示 ▼ -->
   <div class="header">
     <div class="title">地理統計クイズ</div>
     <div class="version">v0.1.0α</div>
@@ -34,7 +33,6 @@
 
   <div class="card">
 
-    <!-- ▼ ジャンル選択タブ ▼ -->
     <div class="tabs">
       <div class="tab" data-genre="agri">農林水産業</div>
       <div class="tab energy" data-genre="energy">エネルギー・鉱工業</div>
@@ -200,6 +198,8 @@
       result.innerHTML=html;
       document.querySelector('.card').appendChild(result);
 
+      // ひとこと枠
+      let lastElement = result;
       if(currentQuiz.comment && currentQuiz.comment.trim()!==""){
         const commentDiv=document.createElement('div');
         commentDiv.id='commentBlock';
@@ -209,9 +209,13 @@
         commentDiv.style.borderRadius='8px';
         commentDiv.innerHTML=`<strong>ひとこと:</strong><br>${currentQuiz.comment}`;
         document.querySelector('.card').appendChild(commentDiv);
+        lastElement = commentDiv;
       }
 
-      document.getElementById('newQuizBtn').style.display='block';
+      // 新しい問題ボタンをひとことの下に移動
+      const newBtn=document.getElementById('newQuizBtn');
+      newBtn.style.display='block';
+      document.querySelector('.card').appendChild(newBtn);
     }
 
     document.querySelectorAll('.tab').forEach(tab=>{
