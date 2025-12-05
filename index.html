@@ -1,207 +1,216 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>地理統計クイズ</title>
-  <style>
-    body { font-family: system-ui, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
-    .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
-    h1 { font-size: 1.5rem; text-align: center; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>地理統計クイズ</title>
+<style>
+body { font-family: system-ui, sans-serif; margin:0; padding:20px; background:#f5f5f5; }
+.card { background:white; padding:20px; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,0.1); max-width:500px; margin:auto; }
+h1 { font-size:1.5rem; text-align:center; }
 
-    /* --- ジャンルタブ --- */
-    .tabs { display: flex; justify-content: space-around; margin-bottom: 15px; }
-    .tab { flex: 1; font-size: 0.8rem; padding: 8px; border: none; background: #99d7ff; border-radius: 6px; text-align:center; }
-    .tab.active { background: #007aff; color: white; }
-    .tab.energy { font-size: 0.72rem; }
+.tabs { display:flex; justify-content:space-around; margin-bottom:15px; }
+.tab { flex:1; font-size:0.8rem; padding:8px; border:none; background:#99d7ff; border-radius:6px; text-align:center; }
+.tab.active { background:#007aff; color:white; }
 
-    .small-span { font-size: 0.8em; vertical-align: text-bottom; }
+button.main { width:100%; padding:14px; margin-top:15px; font-size:1.1rem; border:none; border-radius:8px; background:#007aff; color:white; }
+button.small { width:100%; padding:10px; margin-top:10px; font-size:1rem; border:none; border-radius:8px; }
 
-    button.main { width: 100%; padding: 14px; margin-top: 15px; font-size: 1.1rem; border: none; border-radius: 8px; background: #007aff; color: white; }
-    button.small { width: 100%; padding: 10px; margin-top: 10px; font-size: 1rem; border: none; border-radius: 8px; }
-    #choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-    #question { margin-top: 20px; font-size: 1.2rem; }
-  </style>
+#choices { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px; }
+.choice-btn { background:#007aff; color:white; border-radius:8px; padding:10px; border:none; }
+.choice-btn.selected { background:#99d7ff; color:#333; }
+
+#streak { text-align:right; font-size:0.9rem; margin-top:-10px; color:#ff9933; }
+
+.result-box, .comment-box { margin-top:20px; padding:10px; border-radius:8px; background:#eef; }
+
+#answerBlock { margin-top:20px; display:block; }
+</style>
 </head>
 <body>
-  <div class="card">
-
-    <!-- ▼ ジャンル選択タブ ▼ -->
-    <div class="tabs">
-      <div class="tab active" data-genre="agri">農林水産業</div>
-      <div class="tab energy" data-genre="energy">エネルギー・鉱工業</div>
-      <div class="tab" data-genre="other">その他</div>
-    </div>
-
-    <h1 id="quiz-title">●●の輸出量</h1>
-
-    <p id="instruction">1位 → 2位 → 3位 の順で国を選んでください</p>
-
-    <div id="streak" style="text-align:right; font-size:0.9rem; margin-top:-10px; color:#ff9933;"></div>
-
-    <div id="choices"></div>
-
-    <div id="answerBlock" style="margin-top: 20px; display:block;">
-      <strong>あなたの回答:</strong>
-      <ol id="answers"></ol>
-    </div>
-
-    <button id="checkBtn" class="main" onclick="checkAnswer()" style="background:#aaa;" disabled>確定</button>
-    <button id="newQuizBtn" class="small" onclick="newQuiz()" style="display:none; background:#28a745; color:white;">新しい問題</button>
+<div class="card">
+  <div class="tabs">
+    <div class="tab active" data-genre="agri">農林水産業</div>
+    <div class="tab" data-genre="energy">エネルギー・鉱工業</div>
+    <div class="tab" data-genre="other">その他</div>
   </div>
 
-  <script>
-    const quizSets = {
-      agri: [
-        { title: "小麦の輸出量", choices: ["アメリカ","カナダ","フランス","オーストラリア","ロシア","アルゼンチン","ウクライナ","インド","ドイツ","中国"], answer: ["ロシア","カナダ","アメリカ"] },
-        { title: "米の生産量", choices: ["中国","インド","インドネシア","バングラデシュ","ベトナム","タイ","日本","韓国","ブラジル","ミャンマー"], answer: ["中国","インド","インドネシア"] }
-      ],
-      energy: [
-        { title: "石油の生産量", choices: ["アメリカ","サウジアラビア","ロシア","カナダ","イラク","UAE","中国","イラン","ブラジル","クウェート"], answer: ["アメリカ","サウジアラビア","ロシア"] },
-        { title: "鉄鉱石の生産量", choices: ["オーストラリア","ブラジル","中国","インド","ロシア","南アフリカ","ウクライナ","カナダ","スウェーデン","イラン"], answer: ["オーストラリア","ブラジル","中国"] }
-      ],
-      other: [
-        { title: "観光客数（国別）", choices: ["フランス","スペイン","アメリカ","中国","イタリア","トルコ","メキシコ","ドイツ","英国","タイ"], answer: ["フランス","スペイン","アメリカ"] },
-        { title: "スマホ普及率", choices: ["韓国","UAE","シンガポール","台湾","日本","アメリカ","英国","中国","カナダ","オーストラリア"], answer: ["韓国","UAE","シンガポール"] }
-      ]
-    };
+  <h1 id="quiz-title">●<span style="font-size:0.8em;">の</span>輸出量</h1>
+  <p id="instruction">1位 → 2位 → 3位 の順で国を選んでください</p>
+  <div id="streak"></div>
+  <div id="choices"></div>
 
-    let currentGenre = "agri";
-    let currentQuiz = null;
-    let userAnswers = [];
-    let streak = 0;
+  <div id="answerBlock">
+    <strong>あなたの回答:</strong>
+    <ol id="answers"></ol>
+  </div>
 
-    function shuffle(arr) {
-      const a = arr.slice();
-      for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-      }
-      return a;
+  <button id="checkBtn" class="main" onclick="checkAnswer()" disabled>確定</button>
+  <button id="newQuizBtn" class="small" onclick="newQuiz()" style="display:none; background:#28a745; color:white;">新しい問題</button>
+</div>
+
+<script>
+const quizSets = {
+  agri: [
+    { 
+      title:"小麦の輸出量", 
+      choices:["アメリカ","カナダ","フランス","オーストラリア","ロシア","アルゼンチン","ウクライナ","インド","ドイツ","中国"], 
+      answer:["ロシア","カナダ","アメリカ"], 
+      comment:"世界で一番の輸出国はロシアだよ。" 
+    },
+    { 
+      title:"米の生産量", 
+      choices:["中国","インド","インドネシア","バングラデシュ","ベトナム","タイ","日本","韓国","ブラジル","ミャンマー"], 
+      answer:["中国","インド","インドネシア"], 
+      comment:"中国が断トツでトップだね。" 
     }
-
-    document.querySelectorAll('.tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        currentGenre = tab.dataset.genre;
-        newQuiz();
-      });
-    });
-
-    function updateStreak() {
-      const s = document.getElementById('streak');
-      if (streak >= 1) s.textContent = `🎯 ${streak}問連続正解！`;
-      else s.textContent = "";
+  ],
+  energy: [
+    { 
+      title:"石油の生産量",
+      choices:["アメリカ","サウジアラビア","ロシア","カナダ","イラク","UAE","中国","イラン","ブラジル","クウェート"],
+      answer:["アメリカ","サウジアラビア","ロシア"],
+      comment:"アメリカが首位、次にサウジとロシア。" 
+    },
+    { 
+      title:"鉄鉱石の生産量",
+      choices:["オーストラリア","ブラジル","中国","インド","ロシア","南アフリカ","ウクライナ","カナダ","スウェーデン","イラン"],
+      answer:["オーストラリア","ブラジル","中国"],
+      comment:"" 
     }
-
-    function newQuiz() {
-      const old = document.getElementById('result');
-      if (old) old.remove();
-
-      document.getElementById('instruction').style.display = 'block';
-      userAnswers = [];
-      document.getElementById('answers').innerHTML = '';
-      document.getElementById('answerBlock').style.display = 'block';
-      document.getElementById('choices').style.display = 'grid';
-
-      const set = quizSets[currentGenre];
-      currentQuiz = set[Math.floor(Math.random() * set.length)];
-      document.getElementById('quiz-title').innerHTML = currentQuiz.title.replace("の","<span class='small-span'>の</span>");
-
-      const choices = shuffle(currentQuiz.choices);
-      const box = document.getElementById('choices');
-      box.innerHTML = '';
-      choices.forEach(name => {
-        const btn = document.createElement('button');
-        btn.textContent = name;
-        btn.className = 'small';
-        btn.style.background = '#007aff';
-        btn.style.color = 'white';
-        btn.style.borderRadius = '8px';
-        btn.addEventListener('click', () => toggleSelect(name, btn));
-        box.appendChild(btn);
-      });
-
-      const checkBtn = document.getElementById('checkBtn');
-      checkBtn.disabled = true;
-      checkBtn.style.background = '#aaa';
-      checkBtn.style.display = 'block';
-      document.getElementById('newQuizBtn').style.display = 'none';
-
-      updateStreak();
+  ],
+  other: [
+    { 
+      title:"観光客数（国別）",
+      choices:["フランス","スペイン","アメリカ","中国","イタリア","トルコ","メキシコ","ドイツ","英国","タイ"],
+      answer:["フランス","スペイン","アメリカ"],
+      comment:"フランスは観光大国。" 
+    },
+    { 
+      title:"スマホ普及率",
+      choices:["韓国","UAE","シンガポール","台湾","日本","アメリカ","英国","中国","カナダ","オーストラリア"],
+      answer:["韓国","UAE","シンガポール"],
+      comment:"韓国とUAEがトップクラス。" 
     }
+  ]
+};
 
-    function toggleSelect(name, btn) {
-      const idx = userAnswers.indexOf(name);
-      if (idx !== -1) {
-        userAnswers.splice(idx, 1);
-        btn.style.background = '#007aff';
-        btn.style.color = 'white';
-      } else {
-        if (userAnswers.length >= 3) return;
-        userAnswers.push(name);
-        btn.style.background = '#99d7ff';
-        btn.style.color = '#003366';
-      }
+let currentGenre = "agri";
+let currentQuiz = null;
+let userAnswers = [];
+let streak = 0;
 
-      const list = document.getElementById('answers');
-      list.innerHTML = '';
-      userAnswers.forEach(a => {
-        const li = document.createElement('li');
-        li.textContent = a;
-        list.appendChild(li);
-      });
+function shuffle(arr) {
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
 
-      const checkBtn = document.getElementById('checkBtn');
-      if (userAnswers.length === 3) {
-        checkBtn.disabled = false;
-        checkBtn.style.background = '#28a745';
-      } else {
-        checkBtn.disabled = true;
-        checkBtn.style.background = '#aaa';
-      }
-    }
-
-    function checkAnswer() {
-      const correct = currentQuiz.answer;
-
-      document.getElementById('instruction').style.display = 'none';
-      document.getElementById('answerBlock').style.display = 'none';
-      document.getElementById('choices').style.display = 'none';
-      document.getElementById('checkBtn').style.display = 'none';
-      document.getElementById('newQuizBtn').style.display = 'block';
-
-      let allCorrect = true;
-      for (let i = 0; i < 3; i++) {
-        if (correct[i] !== userAnswers[i]) allCorrect = false;
-      }
-
-      if (allCorrect) streak++;
-      else streak = 0;
-      updateStreak();
-
-      const result = document.createElement('div');
-      result.id = 'result';
-      result.style.marginTop = '20px';
-      result.style.background = '#eef';
-      result.style.padding = '10px';
-      result.style.borderRadius = '8px';
-
-      let html = '<strong>結果:</strong><br><br>';
-      for (let i = 0; i < 3; i++) {
-        const ok = (userAnswers[i] === correct[i]);
-        const icon = ok ? '⭕' : '❌';
-        const color = ok ? '#28a745' : '#d00';
-        html += `${icon} ${i+1}位 → <span style='color:${color}'>あなた: ${userAnswers[i] || '-'} / 正解: ${correct[i]}</span><br>`;
-      }
-
-      result.innerHTML = html;
-      const newBtn = document.getElementById('newQuizBtn');
-      newBtn.parentElement.insertBefore(result, newBtn);
-    }
-
+// ジャンル切替
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    currentGenre = tab.dataset.genre;
     newQuiz();
-  </script>
+  });
+});
+
+function updateStreak(){
+  const s=document.getElementById('streak');
+  s.textContent = streak>=1?`🎯 ${streak}問連続正解！`:"";
+}
+
+function newQuiz(){
+  const old=document.querySelector('.result-box');
+  if(old) old.remove();
+  const oldC=document.querySelector('.comment-box');
+  if(oldC) oldC.remove();
+
+  userAnswers=[];
+  document.getElementById('answers').innerHTML='';
+  document.getElementById('answerBlock').style.display='block';
+  document.getElementById('choices').style.display='grid';
+  document.getElementById('checkBtn').style.display='block';
+  document.getElementById('checkBtn').disabled=true;
+  document.getElementById('checkBtn').style.background='#aaa';
+  document.getElementById('newQuizBtn').style.display='none';
+
+  currentQuiz = shuffle(quizSets[currentGenre])[0];
+  document.getElementById('quiz-title').innerHTML = currentQuiz.title.replace('の', '●<span style="font-size:0.8em;">の</span>');
+
+  const box=document.getElementById('choices');
+  box.innerHTML='';
+  shuffle(currentQuiz.choices).forEach(name=>{
+    const btn=document.createElement('button');
+    btn.textContent=name;
+    btn.className='choice-btn';
+    btn.addEventListener('click',()=>toggleSelect(name,btn));
+    box.appendChild(btn);
+  });
+}
+
+function toggleSelect(name,btn){
+  const idx=userAnswers.indexOf(name);
+  if(idx!==-1){
+    userAnswers.splice(idx,1);
+    btn.classList.remove('selected');
+  }else{
+    if(userAnswers.length>=3) return;
+    userAnswers.push(name);
+    btn.classList.add('selected');
+  }
+  const list=document.getElementById('answers');
+  list.innerHTML='';
+  userAnswers.forEach(a=>{
+    const li=document.createElement('li');
+    li.textContent=a;
+    list.appendChild(li);
+  });
+  const checkBtn=document.getElementById('checkBtn');
+  if(userAnswers.length===3){
+    checkBtn.disabled=false;
+    checkBtn.style.background='#28a745';
+  }else{
+    checkBtn.disabled=true;
+    checkBtn.style.background='#aaa';
+  }
+}
+
+function checkAnswer(){
+  const correct=currentQuiz.answer;
+
+  document.getElementById('answerBlock').style.display='none';
+  document.getElementById('choices').style.display='none';
+  document.getElementById('checkBtn').style.display='none';
+  document.getElementById('newQuizBtn').style.display='block';
+
+  let allCorrect=true;
+  for(let i=0;i<3;i++) if(correct[i]!==userAnswers[i]) allCorrect=false;
+  if(allCorrect) streak++; else streak=0;
+  updateStreak();
+
+  const result=document.createElement('div');
+  result.className='result-box';
+  let html='<strong>結果:</strong><br><br>';
+  for(let i=0;i<3;i++){
+    const ok=(userAnswers[i]===correct[i]);
+    const icon=ok?'⭕':'❌';
+    const color=ok?'#28a745':'#d00';
+    html+=`${icon} ${i+1}位 → <span style="color:${color}">あなた: ${userAnswers[i]||'-'} / 正解: ${correct[i]}</span><br>`;
+  }
+  result.innerHTML=html;
+  document.querySelector('.card').appendChild(result);
+
+  if(currentQuiz.comment && currentQuiz.comment.trim()!==''){
+    const commentBox=document.createElement('div');
+    commentBox.className='comment-box';
+    commentBox.textContent=currentQuiz.comment;
+    document.querySelector('.card').insertBefore(commentBox, document.getElementById('newQuizBtn'));
+  }
+}
+
+newQuiz();
+</script>
 </body>
 </html>
