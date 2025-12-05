@@ -11,20 +11,16 @@
 
     /* --- ジャンルタブ --- */
     .tabs { display: flex; justify-content: space-around; margin-bottom: 15px; }
-    .tab { 
-      flex: 1; font-size: 0.7rem; padding: 8px; border: none; background: #ddd; border-radius: 6px; text-align:center; margin:0 2px; cursor:pointer;
-      display: flex; justify-content: center; align-items: center; /* 縦横中央 */
-    }
-    .tab.small-text { font-size: 0.6rem; } /* エネルギー・鉱工業用 */
+    .tab { flex: 1; font-size: 0.8rem; padding: 10px 0; border: none; background: #ddd; border-radius: 6px; text-align:center; display:flex; align-items:center; justify-content:center; }
     .tab.active { background: #007aff; color: white; }
+    .tab.energy { font-size: 0.72rem; }
+
+    .small-span { font-size: 0.8em; vertical-align: text-bottom; }
 
     button.main { width: 100%; padding: 14px; margin-top: 15px; font-size: 1.1rem; border: none; border-radius: 8px; background: #007aff; color: white; }
     button.small { width: 100%; padding: 10px; margin-top: 10px; font-size: 1rem; border: none; border-radius: 8px; }
     #choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
     #question { margin-top: 20px; font-size: 1.2rem; }
-
-    /* タイトルの「の」下端揃え */
-    .small-span { font-size:0.8em; vertical-align:text-bottom; }
   </style>
 </head>
 <body>
@@ -33,11 +29,11 @@
     <!-- ▼ ジャンル選択タブ ▼ -->
     <div class="tabs">
       <div class="tab active" data-genre="agri">農林水産業</div>
-      <div class="tab small-text" data-genre="energy">エネルギー・鉱工業</div>
+      <div class="tab energy" data-genre="energy">エネルギー・鉱工業</div>
       <div class="tab" data-genre="other">その他</div>
     </div>
 
-    <h1 id="quiz-title">●●<span class="small-span">の</span>輸出量</h1>
+    <h1 id="quiz-title">●●の輸出量</h1>
 
     <p id="instruction">1位 → 2位 → 3位 の順で国を選んでください</p>
 
@@ -55,55 +51,26 @@
   </div>
 
   <script>
-    /* --- データ（ジャンル別） --- */
     const quizSets = {
       agri: [
-        {
-          title: "小麦の輸出量",
-          choices: ["アメリカ","カナダ","フランス","オーストラリア","ロシア","アルゼンチン","ウクライナ","インド","ドイツ","中国"],
-          answer: ["ロシア","カナダ","アメリカ"]
-        },
-        {
-          title: "米の生産量",
-          choices: ["中国","インド","インドネシア","バングラデシュ","ベトナム","タイ","日本","韓国","ブラジル","ミャンマー"],
-          answer: ["中国","インド","インドネシア"]
-        }
+        { title: "小麦の輸出量", choices: ["アメリカ","カナダ","フランス","オーストラリア","ロシア","アルゼンチン","ウクライナ","インド","ドイツ","中国"], answer: ["ロシア","カナダ","アメリカ"] },
+        { title: "米の生産量", choices: ["中国","インド","インドネシア","バングラデシュ","ベトナム","タイ","日本","韓国","ブラジル","ミャンマー"], answer: ["中国","インド","インドネシア"] }
       ],
-
       energy: [
-        {
-          title: "石油の生産量",
-          choices: ["アメリカ","サウジアラビア","ロシア","カナダ","イラク","UAE","中国","イラン","ブラジル","クウェート"],
-          answer: ["アメリカ","サウジアラビア","ロシア"]
-        },
-        {
-          title: "鉄鉱石の生産量",
-          choices: ["オーストラリア","ブラジル","中国","インド","ロシア","南アフリカ","ウクライナ","カナダ","スウェーデン","イラン"],
-          answer: ["オーストラリア","ブラジル","中国"]
-        }
+        { title: "石油の生産量", choices: ["アメリカ","サウジアラビア","ロシア","カナダ","イラク","UAE","中国","イラン","ブラジル","クウェート"], answer: ["アメリカ","サウジアラビア","ロシア"] },
+        { title: "鉄鉱石の生産量", choices: ["オーストラリア","ブラジル","中国","インド","ロシア","南アフリカ","ウクライナ","カナダ","スウェーデン","イラン"], answer: ["オーストラリア","ブラジル","中国"] }
       ],
-
       other: [
-        {
-          title: "観光客数（国別）",
-          choices: ["フランス","スペイン","アメリカ","中国","イタリア","トルコ","メキシコ","ドイツ","英国","タイ"],
-          answer: ["フランス","スペイン","アメリカ"]
-        },
-        {
-          title: "スマホ普及率",
-          choices: ["韓国","UAE","シンガポール","台湾","日本","アメリカ","英国","中国","カナダ","オーストラリア"],
-          answer: ["韓国","UAE","シンガポール"]
-        }
-      ],
+        { title: "観光客数（国別）", choices: ["フランス","スペイン","アメリカ","中国","イタリア","トルコ","メキシコ","ドイツ","英国","タイ"], answer: ["フランス","スペイン","アメリカ"] },
+        { title: "スマホ普及率", choices: ["韓国","UAE","シンガポール","台湾","日本","アメリカ","英国","中国","カナダ","オーストラリア"], answer: ["韓国","UAE","シンガポール"] }
+      ]
     };
 
-    /* --- 変数 --- */
     let currentGenre = "agri";
     let currentQuiz = null;
     let userAnswers = [];
     let streak = 0;
 
-    /* --- 配列シャッフル --- */
     function shuffle(arr) {
       const a = arr.slice();
       for (let i = a.length - 1; i > 0; i--) {
@@ -113,7 +80,6 @@
       return a;
     }
 
-    /* --- ジャンル変更 --- */
     document.querySelectorAll('.tab').forEach(tab => {
       tab.addEventListener('click', () => {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -123,24 +89,22 @@
       });
     });
 
-    /* --- 連続正解表示 --- */
     function updateStreak() {
       const s = document.getElementById('streak');
       if (streak >= 1) s.textContent = `🎯 ${streak}問連続正解！`;
       else s.textContent = "";
     }
 
-    /* --- 新しい問題 --- */
     function newQuiz() {
       const old = document.getElementById('result');
       if (old) old.remove();
 
+      document.getElementById('instruction').style.display = 'block';
       userAnswers = [];
       document.getElementById('answers').innerHTML = '';
       document.getElementById('answerBlock').style.display = 'block';
       document.getElementById('choices').style.display = 'grid';
 
-      // ランダムに1問選ぶ
       const set = quizSets[currentGenre];
       currentQuiz = set[Math.floor(Math.random() * set.length)];
       document.getElementById('quiz-title').innerHTML = currentQuiz.title.replace("の","<span class='small-span'>の</span>");
@@ -148,7 +112,6 @@
       const choices = shuffle(currentQuiz.choices);
       const box = document.getElementById('choices');
       box.innerHTML = '';
-
       choices.forEach(name => {
         const btn = document.createElement('button');
         btn.textContent = name;
@@ -169,10 +132,8 @@
       updateStreak();
     }
 
-    /* --- 選択 --- */
     function toggleSelect(name, btn) {
       const idx = userAnswers.indexOf(name);
-
       if (idx !== -1) {
         userAnswers.splice(idx, 1);
         btn.style.background = '#007aff';
@@ -202,10 +163,10 @@
       }
     }
 
-    /* --- 判定 --- */
     function checkAnswer() {
       const correct = currentQuiz.answer;
 
+      document.getElementById('instruction').style.display = 'none';
       document.getElementById('answerBlock').style.display = 'none';
       document.getElementById('choices').style.display = 'none';
       document.getElementById('checkBtn').style.display = 'none';
@@ -236,7 +197,8 @@
       }
 
       result.innerHTML = html;
-      document.querySelector('.card').appendChild(result);
+      const newBtn = document.getElementById('newQuizBtn');
+      newBtn.parentElement.insertBefore(result, newBtn);
     }
 
     newQuiz();
