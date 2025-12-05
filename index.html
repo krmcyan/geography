@@ -38,7 +38,7 @@
       <div class="tab" data-genre="other">その他</div>
     </div>
 
-    <h1 id="quiz-title">小麦<span style="font-size:0.8em; vertical-align:bottom;">の</span>輸出量<span id="quiz-year" style="font-size:0.8em; vertical-align:bottom;">(2023)</span></h1>
+    <h1 id="quiz-title">小麦<span style="font-size:0.7em; vertical-align:bottom;">の</span>輸出量<span id="quiz-year" style="font-size:0.7em; vertical-align:bottom;">(2023)</span></h1>
 
     <p id="instruction">1位 → 2位 → 3位 の順で国を選んでください</p>
 
@@ -121,8 +121,8 @@
 
       currentQuiz = currentQuizPerGenre[currentGenre];
       previousQuizPerGenre[currentGenre] = currentQuiz;
-      document.getElementById('quiz-title').innerHTML = currentQuiz.title.replace('の', '<span style="font-size:0.8em; vertical-align:bottom;">の</span>') +
-        `<span id="quiz-year" style="font-size:0.8em; vertical-align:bottom;">(${currentQuiz.year})</span>`;
+      document.getElementById('quiz-title').innerHTML = currentQuiz.title.replace('の', '<span style="font-size:0.7em; vertical-align:bottom;">の</span>') +
+        `<span id="quiz-year" style="font-size:0.7em; vertical-align:bottom;">(${currentQuiz.year})</span>`;
 
       const box = document.getElementById('choices');
       box.innerHTML='';
@@ -198,7 +198,6 @@
       result.innerHTML=html;
       document.querySelector('.card').appendChild(result);
 
-      let lastElement = result;
       if(currentQuiz.comment && currentQuiz.comment.trim()!==""){
         const commentDiv=document.createElement('div');
         commentDiv.id='commentBlock';
@@ -208,7 +207,6 @@
         commentDiv.style.borderRadius='8px';
         commentDiv.innerHTML=`<strong>ひとこと:</strong><br>${currentQuiz.comment}`;
         document.querySelector('.card').appendChild(commentDiv);
-        lastElement = commentDiv;
       }
 
       const newBtn=document.getElementById('newQuizBtn');
