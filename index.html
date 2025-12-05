@@ -14,13 +14,59 @@
     h1 { font-size: 1.5rem; text-align: center; }
 
     .tabs { display: flex; justify-content: space-around; margin-bottom: 15px; }
-    .tab { flex: 1; font-size: 0.8rem; padding: 8px; border: none; background: #aad6f7; border-radius: 6px; text-align:center; display:flex; align-items:center; justify-content:center; }
+    .tab { flex: 1; font-size: 0.8rem; padding: 8px; border: none; background: #aad6f7; border-radius: 6px; text-align:center; display:flex; align-items:center; justify-content:center; cursor:pointer; }
     .tab.energy { font-size:10px; }
     .tab.active { background: #007aff; color: white; }
 
     button.main { width: 100%; padding: 14px; margin-top: 15px; font-size: 1.1rem; border: none; border-radius: 8px; background: #007aff; color: white; }
     button.small { width: 100%; padding: 10px; margin-top: 10px; font-size: 1.05rem; border: none; border-radius: 8px; }
     #choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+
+    /* ▼▼ 概要ポップアップ用 ▼▼ */
+    #aboutBtn {
+      position: fixed;
+      right: 15px;
+      bottom: 15px;
+      background: #ffdddd;
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      border-radius: 6px;
+      cursor: pointer;
+      border: solid 1px #ffaaaa;
+    }
+
+    #overlay {
+      display:none;
+      position: fixed;
+      top:0; left:0;
+      width:100%; height:100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 5;
+    }
+
+    #aboutWindow {
+      display:none;
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      width: 80%;
+      max-width: 400px;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+      z-index: 10;
+    }
+
+    #aboutClose {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+    /* ▲▲ ここまで ▲▲ */
   </style>
 </head>
 <body>
@@ -38,7 +84,9 @@
       <div class="tab" data-genre="other">その他</div>
     </div>
 
-    <h1 id="quiz-title">小麦<span style="font-size:0.7em; vertical-align:bottom;">の</span>輸出量<span id="quiz-year" style="font-size:0.7em; vertical-align:bottom;">(2023)</span></h1>
+    <h1 id="quiz-title">小麦<span style="font-size:0.7em; vertical-align:bottom;">の</span>輸出量
+      <span id="quiz-year" style="font-size:0.7em; vertical-align:bottom;">(2023)</span>
+    </h1>
 
     <p id="instruction">1位 → 2位 → 3位 の順で国を選んでください</p>
 
@@ -53,180 +101,220 @@
 
     <button id="checkBtn" class="main" onclick="checkAnswer()" style="background:#aaa;" disabled>確定</button>
     <button id="newQuizBtn" class="small" onclick="newQuiz(true)" style="display:none; background:#28a745; color:white;">新しい問題</button>
+
   </div>
 
-  <script>
-    const quizSets = {
-      agri: [
-        { title:"小麦の輸出量", year:"2023", choices:["アメリカ","カナダ","フランス","オーストラリア","ロシア","アルゼンチン","ウクライナ","インド","ドイツ","中国"], answer:["ロシア","カナダ","アメリカ"], comment:"ロシアが最大です。" },
-        { title:"米の生産量", year:"2022", choices:["中国","インド","インドネシア","バングラデシュ","ベトナム","タイ","日本","韓国","ブラジル","ミャンマー"], answer:["中国","インド","インドネシア"], comment:"アジアが多いです。" }
-      ],
-      energy: [
-        { title:"石油の生産量", year:"2023", choices:["アメリカ","サウジアラビア","ロシア","カナダ","イラク","UAE","中国","イラン","ブラジル","クウェート"], answer:["アメリカ","サウジアラビア","ロシア"], comment:"アメリカがトップ。" },
-        { title:"鉄鉱石の生産量", year:"2023", choices:["オーストラリア","ブラジル","中国","インド","ロシア","南アフリカ","ウクライナ","カナダ","スウェーデン","イラン"], answer:["オーストラリア","ブラジル","中国"], comment:"オーストラリアが一番です。" }
-      ],
-      other: [
-        { title:"観光客数（国別）", year:"2023", choices:["フランス","スペイン","アメリカ","中国","イタリア","トルコ","メキシコ","ドイツ","英国","タイ"], answer:["フランス","スペイン","アメリカ"], comment:"ヨーロッパ人気。" },
-        { title:"スマホ普及率", year:"2023", choices:["韓国","UAE","シンガポール","台湾","日本","アメリカ","英国","中国","カナダ","オーストラリア"], answer:["韓国","UAE","シンガポール"], comment:"アジアが上位。" }
-      ]
-    };
+  <!-- ▼▼ 概要ポップアップ ▼▼ -->
+  <div id="aboutBtn">このサイトの概要</div>
 
-    let currentGenre = "agri";
-    let currentQuiz = null;
-    let userAnswers = [];
-    let streak = 0;
-    let currentQuizPerGenre = {};
-    let previousQuizPerGenre = {};
+  <div id="overlay"></div>
 
-    function shuffle(arr) {
-      const a = arr.slice();
-      for(let i=a.length-1;i>0;i--){
-        const j=Math.floor(Math.random()*(i+1));
-        [a[i],a[j]]=[a[j],a[i]];
-      }
-      return a;
-    }
+  <div id="aboutWindow">
+    <div id="aboutClose">×</div>
+    <h3>このサイトの概要</h3>
+    <p>このサイトは、地理の統計を覚えるために作成されました。<br>
+    すべてのデータは、データブック・オブ・ザ・ワールド 2024より製作しました。</p>
 
-    function updateStreak() {
-      const s = document.getElementById('streak');
-      s.textContent = streak>=1?`🎯 ${streak}問連続正解！`:"";
-    }
+    <h4>バージョン履歴</h4>
+    <p>v0.1.0α サイトをアルファ公開</p>
+  </div>
+  <!-- ▲▲ 概要ポップアップ ▲▲ -->
 
-    function newQuiz(fromButton=false) {
-      const old = document.getElementById('result');
-      if(old) old.remove();
-      const oldComment = document.getElementById('commentBlock');
-      if(oldComment) oldComment.remove();
+<script>
+/* ここから JS（君が送ってくれた最新版＋追加部分） */
 
-      userAnswers=[]; 
-      document.getElementById('answers').innerHTML='';
-      document.getElementById('answerBlock').style.display='block';
-      document.getElementById('choices').style.display='grid';
-      document.getElementById('instruction').style.display='block';
-      document.getElementById('checkBtn').disabled = true;
-      document.getElementById('checkBtn').style.background = '#aaa';
-      document.getElementById('checkBtn').style.display='block';
-      document.getElementById('newQuizBtn').style.display='none';
+const quizSets = {
+  agri: [
+    { title:"小麦の輸出量", year:"2023", choices:["アメリカ","カナダ","フランス","オーストラリア","ロシア","アルゼンチン","ウクライナ","インド","ドイツ","中国"], answer:["ロシア","カナダ","アメリカ"], comment:"ロシアが最大です。" },
+    { title:"米の生産量", year:"2022", choices:["中国","インド","インドネシア","バングラデシュ","ベトナム","タイ","日本","韓国","ブラジル","ミャンマー"], answer:["中国","インド","インドネシア"], comment:"アジアが多いです。" }
+  ],
+  energy: [
+    { title:"石油の生産量", year:"2023", choices:["アメリカ","サウジアラビア","ロシア","カナダ","イラク","UAE","中国","イラン","ブラジル","クウェート"], answer:["アメリカ","サウジアラビア","ロシア"], comment:"アメリカがトップ。" },
+    { title:"鉄鉱石の生産量", year:"2023", choices:["オーストラリア","ブラジル","中国","インド","ロシア","南アフリカ","ウクライナ","カナダ","スウェーデン","イラン"], answer:["オーストラリア","ブラジル","中国"], comment:"オーストラリアが一番です。" }
+  ],
+  other: [
+    { title:"観光客数（国別）", year:"2023", choices:["フランス","スペイン","アメリカ","中国","イタリア","トルコ","メキシコ","ドイツ","英国","タイ"], answer:["フランス","スペイン","アメリカ"], comment:"ヨーロッパ人気。" },
+    { title:"スマホ普及率", year:"2023", choices:["韓国","UAE","シンガポール","台湾","日本","アメリカ","英国","中国","カナダ","オーストラリア"], answer:["韓国","UAE","シンガポール"], comment:"アジアが上位。" }
+  ]
+};
 
-      const set = quizSets[currentGenre];
-      let candidateSet = set.slice();
+let currentGenre = "agri";
+let currentQuiz = null;
+let userAnswers = [];
+let streak = 0;
+let currentQuizPerGenre = {};
+let previousQuizPerGenre = {};
 
-      if(fromButton && previousQuizPerGenre[currentGenre]){
-        candidateSet = candidateSet.filter(q => q !== previousQuizPerGenre[currentGenre]);
-      }
+function shuffle(arr) {
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
 
-      if(!currentQuizPerGenre[currentGenre] || fromButton){
-        currentQuizPerGenre[currentGenre] = candidateSet[Math.floor(Math.random()*candidateSet.length)];
-      }
+function updateStreak() {
+  const s = document.getElementById('streak');
+  s.textContent = streak>=1?`🎯 ${streak}問連続正解！`:"";
+}
 
-      currentQuiz = currentQuizPerGenre[currentGenre];
-      previousQuizPerGenre[currentGenre] = currentQuiz;
-      document.getElementById('quiz-title').innerHTML = currentQuiz.title.replace('の', '<span style="font-size:0.7em; vertical-align:bottom;">の</span>') +
-        `<span id="quiz-year" style="font-size:0.7em; vertical-align:bottom;">(${currentQuiz.year})</span>`;
+function newQuiz(fromButton=false) {
+  const old = document.getElementById('result');
+  if(old) old.remove();
+  const oldComment = document.getElementById('commentBlock');
+  if(oldComment) oldComment.remove();
 
-      const box = document.getElementById('choices');
-      box.innerHTML='';
-      shuffle(currentQuiz.choices).forEach(name=>{
-        const btn=document.createElement('button');
-        btn.textContent=name;
-        btn.className='small';
-        btn.style.background='#00aaff';
-        btn.style.color='white';
-        btn.style.borderRadius='8px';
-        btn.style.fontSize='1.05rem';
-        btn.addEventListener('click',()=>toggleSelect(name,btn));
-        box.appendChild(btn);
-      });
-    }
+  userAnswers=[]; 
+  document.getElementById('answers').innerHTML='';
+  document.getElementById('answerBlock').style.display='block';
+  document.getElementById('choices').style.display='grid';
+  document.getElementById('instruction').style.display='block';
+  document.getElementById('checkBtn').disabled = true;
+  document.getElementById('checkBtn').style.background = '#aaa';
+  document.getElementById('checkBtn').style.display='block';
+  document.getElementById('newQuizBtn').style.display='none';
 
-    function toggleSelect(name, btn){
-      const idx=userAnswers.indexOf(name);
-      if(idx!==-1){
-        userAnswers.splice(idx,1);
-        btn.style.background='#00aaff';
-        btn.style.color='white';
-      }else{
-        if(userAnswers.length>=3) return;
-        userAnswers.push(name);
-        btn.style.background='#a0e7ff';
-        btn.style.color='#333';
-      }
-      const list=document.getElementById('answers');
-      list.innerHTML='';
-      userAnswers.forEach(a=>{
-        const li=document.createElement('li');
-        li.textContent=a;
-        list.appendChild(li);
-      });
-      const checkBtn=document.getElementById('checkBtn');
-      if(userAnswers.length===3){
-        checkBtn.disabled=false;
-        checkBtn.style.background='#28a745';
-      }else{
-        checkBtn.disabled=true;
-        checkBtn.style.background='#aaa';
-      }
-    }
+  const set = quizSets[currentGenre];
+  let candidateSet = set.slice();
 
-    function checkAnswer(){
-      const correct=currentQuiz.answer;
-      document.getElementById('answerBlock').style.display='none';
-      document.getElementById('choices').style.display='none';
-      document.getElementById('instruction').style.display='none';
-      document.getElementById('checkBtn').style.display='none';
+  if(fromButton && previousQuizPerGenre[currentGenre]){
+    candidateSet = candidateSet.filter(q => q !== previousQuizPerGenre[currentGenre]);
+  }
 
-      let allCorrect=true;
-      for(let i=0;i<3;i++){
-        if(correct[i]!==userAnswers[i]) allCorrect=false;
-      }
-      streak=allCorrect?streak+1:0;
-      updateStreak();
+  if(!currentQuizPerGenre[currentGenre] || fromButton){
+    currentQuizPerGenre[currentGenre] = candidateSet[Math.floor(Math.random()*candidateSet.length)];
+  }
 
-      const result=document.createElement('div');
-      result.id='result';
-      result.style.marginTop='10px';
-      result.style.background='#eef';
-      result.style.padding='10px';
-      result.style.borderRadius='8px';
-      let html='<strong>結果:</strong><br>';
-      for(let i=0;i<3;i++){
-        const ok=userAnswers[i]===correct[i];
-        const icon=ok?'⭕':'❌';
-        const color=ok?'#28a745':'#d00';
-        html+=`${icon} ${i+1}位 → <span style='color:${color}'>あなた: ${userAnswers[i]||'-'} / 正解: ${correct[i]}</span><br>`;
-      }
-      result.innerHTML=html;
-      document.querySelector('.card').appendChild(result);
+  currentQuiz = currentQuizPerGenre[currentGenre];
+  previousQuizPerGenre[currentGenre] = currentQuiz;
 
-      if(currentQuiz.comment && currentQuiz.comment.trim()!==""){
-        const commentDiv=document.createElement('div');
-        commentDiv.id='commentBlock';
-        commentDiv.style.margin='10px 0';
-        commentDiv.style.background='#ffe';
-        commentDiv.style.padding='10px';
-        commentDiv.style.borderRadius='8px';
-        commentDiv.innerHTML=`<strong>ひとこと:</strong><br>${currentQuiz.comment}`;
-        document.querySelector('.card').appendChild(commentDiv);
-      }
+  document.getElementById('quiz-title').innerHTML =
+    currentQuiz.title.replace('の','<span style="font-size:0.7em; vertical-align:bottom;">の</span>')
+    + `<span id="quiz-year" style="font-size:0.7em; vertical-align:bottom;">(${currentQuiz.year})</span>`;
 
-      const newBtn=document.getElementById('newQuizBtn');
-      newBtn.style.display='block';
-      document.querySelector('.card').appendChild(newBtn);
-    }
+  const box = document.getElementById('choices');
+  box.innerHTML='';
 
-    document.querySelectorAll('.tab').forEach(tab=>{
-      tab.addEventListener('click',()=>{
-        const genre = tab.dataset.genre;
-        if(currentGenre===genre && currentQuizPerGenre[genre]) return;
-        currentGenre=genre;
-        document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-        tab.classList.add('active');
-        newQuiz();
-      });
-    });
+  shuffle(currentQuiz.choices).forEach(name=>{
+    const btn=document.createElement('button');
+    btn.textContent=name;
+    btn.className='small';
+    btn.style.background='#00aaff';
+    btn.style.color='white';
+    btn.style.borderRadius='8px';
+    btn.style.fontSize='1.05rem';
+    btn.addEventListener('click',()=>toggleSelect(name,btn));
+    box.appendChild(btn);
+  });
+}
 
-    document.querySelector('.tab[data-genre="'+currentGenre+'"]').classList.add('active');
+function toggleSelect(name, btn){
+  const idx=userAnswers.indexOf(name);
+  if(idx!==-1){
+    userAnswers.splice(idx,1);
+    btn.style.background='#00aaff';
+    btn.style.color='white';
+  }else{
+    if(userAnswers.length>=3) return;
+    userAnswers.push(name);
+    btn.style.background='#a0e7ff';
+    btn.style.color='#333';
+  }
+  const list=document.getElementById('answers');
+  list.innerHTML='';
+  userAnswers.forEach(a=>{
+    const li=document.createElement('li');
+    li.textContent=a;
+    list.appendChild(li);
+  });
+  const checkBtn=document.getElementById('checkBtn');
+  if(userAnswers.length===3){
+    checkBtn.disabled=false;
+    checkBtn.style.background='#28a745';
+  }else{
+    checkBtn.disabled=true;
+    checkBtn.style.background='#aaa';
+  }
+}
+
+function checkAnswer(){
+  const correct=currentQuiz.answer;
+  document.getElementById('answerBlock').style.display='none';
+  document.getElementById('choices').style.display='none';
+  document.getElementById('instruction').style.display='none';
+  document.getElementById('checkBtn').style.display='none';
+
+  let allCorrect=true;
+  for(let i=0;i<3;i++){
+    if(correct[i]!==userAnswers[i]) allCorrect=false;
+  }
+  streak=allCorrect?streak+1:0;
+  updateStreak();
+
+  const result=document.createElement('div');
+  result.id='result';
+  result.style.marginTop='10px';
+  result.style.background='#eef';
+  result.style.padding='10px';
+  result.style.borderRadius='8px';
+  let html='<strong>結果:</strong><br>';
+  for(let i=0;i<3;i++){
+    const ok=userAnswers[i]===correct[i];
+    const icon=ok?'⭕':'❌';
+    const color=ok?'#28a745':'#d00';
+    html+=`${icon} ${i+1}位 → <span style='color:${color}'>あなた: ${userAnswers[i]||'-'} / 正解: ${correct[i]}</span><br>`;
+  }
+  result.innerHTML=html;
+  document.querySelector('.card').appendChild(result);
+
+  if(currentQuiz.comment && currentQuiz.comment.trim()!==""){
+    const commentDiv=document.createElement('div');
+    commentDiv.id='commentBlock';
+    commentDiv.style.margin='10px 0';
+    commentDiv.style.background='#ffe';
+    commentDiv.style.padding='10px';
+    commentDiv.style.borderRadius='8px';
+    commentDiv.innerHTML=`<strong>ひとこと:</strong><br>${currentQuiz.comment}`;
+    document.querySelector('.card').appendChild(commentDiv);
+  }
+
+  const newBtn=document.getElementById('newQuizBtn');
+  newBtn.style.display='block';
+  document.querySelector('.card').appendChild(newBtn);
+}
+
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    const genre = tab.dataset.genre;
+    if(currentGenre===genre && currentQuizPerGenre[genre]) return;
+    currentGenre=genre;
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
     newQuiz();
-  </script>
+  });
+});
+
+document.querySelector('.tab[data-genre="'+currentGenre+'"]').classList.add('active');
+newQuiz();
+
+/* ここから概要ポップアップの追加JS */
+
+document.getElementById('aboutBtn').onclick = ()=>{
+  document.getElementById('overlay').style.display = 'block';
+  document.getElementById('aboutWindow').style.display = 'block';
+};
+
+document.getElementById('aboutClose').onclick = ()=>{
+  document.getElementById('overlay').style.display = 'none';
+  document.getElementById('aboutWindow').style.display = 'none';
+};
+
+document.getElementById('overlay').onclick = ()=>{
+  document.getElementById('overlay').style.display = 'none';
+  document.getElementById('aboutWindow').style.display = 'none';
+};
+
+</script>
 </body>
 </html>
