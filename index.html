@@ -8,6 +8,12 @@
     body { font-family: system-ui, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
     .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
     h1 { font-size: 1.5rem; text-align: center; }
+
+    /* --- ジャンルタブ --- */
+    .tabs { display: flex; justify-content: space-around; margin-bottom: 15px; }
+    .tab { padding: 10px 12px; border-radius: 8px; background: #ddd; cursor: pointer; font-size: 0.9rem; }
+    .tab.active { background: #007aff; color: white; }
+
     button.main { width: 100%; padding: 14px; margin-top: 15px; font-size: 1.1rem; border: none; border-radius: 8px; background: #007aff; color: white; }
     button.small { width: 100%; padding: 10px; margin-top: 10px; font-size: 1rem; border: none; border-radius: 8px; }
     #choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
@@ -16,11 +22,22 @@
 </head>
 <body>
   <div class="card">
+
+    <!-- ▼ ジャンル選択タブ ▼ -->
+    <div class="tabs">
+      <div class="tab active" data-genre="population">人口</div>
+      <div class="tab" data-genre="agri">農林水産業</div>
+      <div class="tab" data-genre="energy">エネルギー・鉱工業</div>
+      <div class="tab" data-genre="other">その他</div>
+    </div>
+
     <h1 id="quiz-title">●●の輸出量ランキング</h1>
 
     <p id="instruction">1位 → 2位 → 3位 の順で国を選んでください</p>
 
-    <div id="choices"><!-- 選択肢10個が入る --></div>
+    <div id="streak" style="text-align:right; font-size:0.9rem; margin-top:-10px; color:#ff9933;"></div>
+
+    <div id="choices"></div>
 
     <div id="answerBlock" style="margin-top: 20px; display:block;">
       <strong>あなたの回答:</strong>
@@ -32,19 +49,69 @@
   </div>
 
   <script>
-    // --- データ ---
-    const quizData = [
-      { title: "小麦の輸出量", choices: ["アメリカ","カナダ","フランス","オーストラリア","ロシア","アルゼンチン","ウクライナ","インド","ドイツ","中国"], answer: ["ロシア","カナダ","アメリカ"] },
-      { title: "石油の生産量", choices: ["アメリカ","サウジアラビア","ロシア","カナダ","イラク","UAE","中国","イラン","ブラジル","クウェート"], answer: ["アメリカ","サウジアラビア","ロシア"] }
-    ];
+    /* --- データ（ジャンル別） --- */
+    const quizSets = {
+      population: [
+        {
+          title: "人口（国別）",
+          choices: ["中国","インド","アメリカ","インドネシア","パキスタン","ブラジル","ナイジェリア","バングラデシュ","ロシア","メキシコ"],
+          answer: ["インド","中国","アメリカ"]
+        },
+        {
+          title: "人口密度（国別）",
+          choices: ["モナコ","シンガポール","バーレーン","バングラデシュ","台湾","韓国","日本","オランダ","ベルギー","ルワンダ"],
+          answer: ["モナコ","シンガポール","バーレーン"]
+        }
+      ],
 
-    // --- 変数 ---
+      agri: [
+        {
+          title: "小麦の輸出量",
+          choices: ["アメリカ","カナダ","フランス","オーストラリア","ロシア","アルゼンチン","ウクライナ","インド","ドイツ","中国"],
+          answer: ["ロシア","カナダ","アメリカ"]
+        },
+        {
+          title: "米の生産量",
+          choices: ["中国","インド","インドネシア","バングラデシュ","ベトナム","タイ","日本","韓国","ブラジル","ミャンマー"],
+          answer: ["中国","インド","インドネシア"]
+        }
+      ],
+
+      energy: [
+        {
+          title: "石油の生産量",
+          choices: ["アメリカ","サウジアラビア","ロシア","カナダ","イラク","UAE","中国","イラン","ブラジル","クウェート"],
+          answer: ["アメリカ","サウジアラビア","ロシア"]
+        },
+        {
+          title: "鉄鉱石の生産量",
+          choices: ["オーストラリア","ブラジル","中国","インド","ロシア","南アフリカ","ウクライナ","カナダ","スウェーデン","イラン"],
+          answer: ["オーストラリア","ブラジル","中国"]
+        }
+      ],
+
+      other: [
+        {
+          title: "観光客数（国別）",
+          choices: ["フランス","スペイン","アメリカ","中国","イタリア","トルコ","メキシコ","ドイツ","英国","タイ"],
+          answer: ["フランス","スペイン","アメリカ"]
+        },
+        {
+          title: "スマホ普及率",
+          choices: ["韓国","UAE","シンガポール","台湾","日本","アメリカ","英国","中国","カナダ","オーストラリア"],
+          answer: ["韓国","UAE","シンガポール"]
+        }
+      ],
+    };
+
+    /* --- 変数 --- */
+    let currentGenre = "agri";
     let currentQuiz = null;
     let userAnswers = [];
-    let selectedButtons = {}; // name -> button element
+    let streak = 0;
 
-    // ヘルパー: 配列シャッフル (Fisher-Yates)
-    function shuffleArray(arr) {
+    /* --- 配列シャッフル --- */
+    function shuffle(arr) {
       const a = arr.slice();
       for (let i = a.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -53,74 +120,77 @@
       return a;
     }
 
-    // 新しい問題を表示
+    /* --- ジャンル変更 --- */
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentGenre = tab.dataset.genre;
+        streak = 0;
+        updateStreak();
+        newQuiz();
+      });
+    });
+
+    /* --- 連続正解表示 --- */
+    function updateStreak() {
+      const s = document.getElementById('streak');
+      if (streak >= 1) s.textContent = `🎯 ${streak}問連続正解！`;
+      else s.textContent = "";
+    }
+
+    /* --- 新しい問題 --- */
     function newQuiz() {
-      // 前の結果を削除
       const old = document.getElementById('result');
       if (old) old.remove();
 
-      // UI 初期化
       userAnswers = [];
-      selectedButtons = {};
       document.getElementById('answers').innerHTML = '';
+      document.getElementById('answerBlock').style.display = 'block';
+      document.getElementById('choices').style.display = 'grid';
 
-      // 問題選択
-      currentQuiz = quizData[Math.floor(Math.random() * quizData.length)];
-      document.getElementById('quiz-title').textContent = currentQuiz.title + ' ランキング';
+      // ランダムに1問選ぶ
+      const set = quizSets[currentGenre];
+      currentQuiz = set[Math.floor(Math.random() * set.length)];
+      document.getElementById('quiz-title').innerHTML = `${currentQuiz.title} <span style="font-size:0.8em;">の</span> ランキング`;
 
-      // 選択肢をシャッフルして作る
-      const shuffled = shuffleArray(currentQuiz.choices);
+      const choices = shuffle(currentQuiz.choices);
       const box = document.getElementById('choices');
       box.innerHTML = '';
-      box.style.display = 'grid';
 
-      shuffled.forEach(name => {
+      choices.forEach(name => {
         const btn = document.createElement('button');
         btn.textContent = name;
         btn.className = 'small';
-        // 見た目
         btn.style.background = '#007aff';
         btn.style.color = 'white';
-        btn.style.padding = '10px';
         btn.style.borderRadius = '8px';
-        // クリック処理
-        btn.addEventListener('click', function () { toggleSelect(name, btn); });
+        btn.addEventListener('click', () => toggleSelect(name, btn));
         box.appendChild(btn);
-        selectedButtons[name] = btn; // 保存
       });
 
-      // ボタン状態
       const checkBtn = document.getElementById('checkBtn');
-      checkBtn.style.display = 'block';
       checkBtn.disabled = true;
-      checkBtn.style.display = 'block';
       checkBtn.style.background = '#aaa';
-
+      checkBtn.style.display = 'block';
       document.getElementById('newQuizBtn').style.display = 'none';
     }
 
-    // 選択/取り消し
+    /* --- 選択 --- */
     function toggleSelect(name, btn) {
-      // 既に選択済みなら取り消し（どの順番でもOK）
       const idx = userAnswers.indexOf(name);
+
       if (idx !== -1) {
-        // 取り消し
         userAnswers.splice(idx, 1);
-        // 見た目を戻す
         btn.style.background = '#007aff';
         btn.style.color = 'white';
-        // クリック可能のままにしておく
       } else {
-        // 新規選択
-        if (userAnswers.length >= 3) return; // すでに3つ選んでいる
+        if (userAnswers.length >= 3) return;
         userAnswers.push(name);
-        // 見た目を選択状態にする
         btn.style.background = '#ccc';
         btn.style.color = '#666';
       }
 
-      // 回答リスト更新
-      
       const list = document.getElementById('answers');
       list.innerHTML = '';
       userAnswers.forEach(a => {
@@ -129,7 +199,6 @@
         list.appendChild(li);
       });
 
-      // 確定ボタンの活性化判定
       const checkBtn = document.getElementById('checkBtn');
       if (userAnswers.length === 3) {
         checkBtn.disabled = false;
@@ -140,44 +209,43 @@
       }
     }
 
-    // 正誤判定
+    /* --- 判定 --- */
     function checkAnswer() {
-      if (userAnswers.length < 3) return;
       const correct = currentQuiz.answer;
 
-      // 選択肢を非表示にする
       document.getElementById('answerBlock').style.display = 'none';
       document.getElementById('choices').style.display = 'none';
-
-      // 確定ボタンは消す
       document.getElementById('checkBtn').style.display = 'none';
-      // 新しい問題ボタンを表示
       document.getElementById('newQuizBtn').style.display = 'block';
 
-      // 結果ブロックを作る
-      const resultBox = document.createElement('div');
-      resultBox.id = 'result';
-      resultBox.style.marginTop = '20px';
-      resultBox.style.padding = '10px';
-      resultBox.style.background = '#eef';
-      resultBox.style.borderRadius = '8px';
+      let allCorrect = true;
+      for (let i = 0; i < 3; i++) {
+        if (correct[i] !== userAnswers[i]) allCorrect = false;
+      }
+
+      if (allCorrect) streak++;
+      else streak = 0;
+      updateStreak();
+
+      const result = document.createElement('div');
+      result.id = 'result';
+      result.style.marginTop = '20px';
+      result.style.background = '#eef';
+      result.style.padding = '10px';
+      result.style.borderRadius = '8px';
 
       let html = '<strong>結果:</strong><br><br>';
       for (let i = 0; i < 3; i++) {
         const ok = (userAnswers[i] === correct[i]);
         const icon = ok ? '⭕' : '❌';
         const color = ok ? '#28a745' : '#d00';
-        html += `${icon} ${i+1}位 → <span style='color:${color}'>あなた: ${userAnswers[i] || '-'}</span> / 正解: ${correct[i]}<br>`;
+        html += `${icon} ${i+1}位 → <span style='color:${color}'>あなた: ${userAnswers[i] || '-'} / 正解: ${correct[i]}</span><br>`;
       }
-      resultBox.innerHTML = html;
 
-      // choices の場所に結果を出す（choices の下にある answers の親の前に挿入）
-      const card = document.querySelector('.card');
-      const answersParent = document.getElementById('answers').parentElement;
-      card.insertBefore(resultBox, answersParent);
+      result.innerHTML = html;
+      document.querySelector('.card').appendChild(result);
     }
 
-    // 初期表示
     newQuiz();
   </script>
 </body>
