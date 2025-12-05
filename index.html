@@ -76,7 +76,7 @@ const quizSets = {
       title:"鉄鉱石の生産量",
       choices:["オーストラリア","ブラジル","中国","インド","ロシア","南アフリカ","ウクライナ","カナダ","スウェーデン","イラン"],
       answer:["オーストラリア","ブラジル","中国"],
-      comment:"" 
+      comment:"鉄鉱石はオーストラリアがトップ。" 
     }
   ],
   other: [
@@ -100,11 +100,7 @@ let currentQuiz = null;
 let userAnswers = [];
 let streak = 0;
 
-function shuffle(arr) {
-  const a = arr.slice();
-  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
-  return a;
-}
+function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
 // ジャンル切替
 document.querySelectorAll('.tab').forEach(tab=>{
@@ -116,16 +112,11 @@ document.querySelectorAll('.tab').forEach(tab=>{
   });
 });
 
-function updateStreak(){
-  const s=document.getElementById('streak');
-  s.textContent = streak>=1?`🎯 ${streak}問連続正解！`:"";
-}
+function updateStreak(){document.getElementById('streak').textContent=streak>=1?`🎯 ${streak}問連続正解！`:"";}
 
 function newQuiz(){
-  const old=document.querySelector('.result-box');
-  if(old) old.remove();
-  const oldC=document.querySelector('.comment-box');
-  if(oldC) oldC.remove();
+  const old=document.querySelector('.result-box'); if(old) old.remove();
+  const oldC=document.querySelector('.comment-box'); if(oldC) oldC.remove();
 
   userAnswers=[];
   document.getElementById('answers').innerHTML='';
@@ -137,7 +128,7 @@ function newQuiz(){
   document.getElementById('newQuizBtn').style.display='none';
 
   currentQuiz = shuffle(quizSets[currentGenre])[0];
-  document.getElementById('quiz-title').innerHTML = currentQuiz.title.replace('の', '●<span style="font-size:0.8em;">の</span>');
+  document.getElementById('quiz-title').innerHTML = currentQuiz.title.replace('の','●<span style="font-size:0.8em;">の</span>');
 
   const box=document.getElementById('choices');
   box.innerHTML='';
@@ -152,29 +143,16 @@ function newQuiz(){
 
 function toggleSelect(name,btn){
   const idx=userAnswers.indexOf(name);
-  if(idx!==-1){
-    userAnswers.splice(idx,1);
-    btn.classList.remove('selected');
-  }else{
-    if(userAnswers.length>=3) return;
-    userAnswers.push(name);
-    btn.classList.add('selected');
-  }
+  if(idx!==-1){userAnswers.splice(idx,1);btn.classList.remove('selected');}
+  else{if(userAnswers.length>=3) return; userAnswers.push(name); btn.classList.add('selected');}
+
   const list=document.getElementById('answers');
   list.innerHTML='';
-  userAnswers.forEach(a=>{
-    const li=document.createElement('li');
-    li.textContent=a;
-    list.appendChild(li);
-  });
+  userAnswers.forEach(a=>{const li=document.createElement('li'); li.textContent=a; list.appendChild(li);});
+
   const checkBtn=document.getElementById('checkBtn');
-  if(userAnswers.length===3){
-    checkBtn.disabled=false;
-    checkBtn.style.background='#28a745';
-  }else{
-    checkBtn.disabled=true;
-    checkBtn.style.background='#aaa';
-  }
+  if(userAnswers.length===3){checkBtn.disabled=false; checkBtn.style.background='#28a745';}
+  else{checkBtn.disabled=true; checkBtn.style.background='#aaa';}
 }
 
 function checkAnswer(){
@@ -187,7 +165,7 @@ function checkAnswer(){
 
   let allCorrect=true;
   for(let i=0;i<3;i++) if(correct[i]!==userAnswers[i]) allCorrect=false;
-  if(allCorrect) streak++; else streak=0;
+  streak=allCorrect?streak+1:0;
   updateStreak();
 
   const result=document.createElement('div');
