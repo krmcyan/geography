@@ -14,8 +14,8 @@
     h1 { font-size: 1.5rem; text-align: center; }
 
     .tabs { display: flex; justify-content: space-around; margin-bottom: 15px; }
-    .tab { flex: 1; font-size: 0.8rem; padding: 8px; border: none; background: #aad6f7; border-radius: 6px; text-align:center; display:flex; align-items:center; justify-content:center; cursor:pointer; }
-    .tab.energy { font-size:10px; }
+    .tab { flex: 1; font-size: 0.8rem; padding: 8px; border: none; background: #aad6f7; border-radius: 6px; text-align:center; cursor:pointer; white-space: pre-wrap; }
+    .tab.energy { font-size:10px; }
     .tab.active { background: #007aff; color: white; }
 
     button.main { width: 100%; padding: 14px; margin-top: 15px; font-size: 1.1rem; border: none; border-radius: 8px; background: #007aff; color: white; }
@@ -167,7 +167,7 @@ const quizSets = {
     { title:"さとうきびの生産量", year:"2021", choices:["ブラジル","インド","中国","タイ","パキスタン","メキシコ","インドネシア","フィリピン","アメリカ","コロンビア"], answer:["ブラジル","インド","中国"], comment:"" },
     { title:"てんさいの生産量", year:"2021", choices:["ロシア","フランス","アメリカ","ドイツ","トルコ","ポーランド","ウクライナ","中国","イギリス","オランダ"], answer:["ロシア","フランス","アメリカ"], comment:"" },
     { title:"パーム油の生産量", year:"2020", choices:["インドネシア","マレーシア","タイ","コロンビア","ナイジェリア","パプアニューギニア","グアテマラ","ホンジュラス","ブラジル","ガーナ"], answer:["インドネシア","マレーシア","タイ"], comment:"" },
-    { title:"コプラの生産量", year:"2020", choices:["インドネシア","フィリピン","インド","スリランカ","パプアニューギニア","ベトナム","ソロモン諸島","タイ","マレーシア","ブラジル"], answer:["インドネシア","フィリピン","インド"], comment:"コプラ＝ココヤシの実の胚乳を乾燥させたもの。石鹸・菓子・マーガリンの原料になります" },
+    { title:"コプラの生産量", year:"2020", choices:["インドネシア","フィリピン","インド","スリランカ","中国","ベトナム","ソロモン諸島","タイ","マレーシア","ブラジル"], answer:["インドネシア","フィリピン","インド"], comment:"コプラ＝ココヤシの実の胚乳を乾燥させたもの。石鹸・菓子・マーガリンの原料になります" },
     { title:"綿花の生産量", year:"2020", choices:["インド","中国","アメリカ","ブラジル","パキスタン","トルコ","ウズベキスタン","オーストラリア","ギリシャ","メキシコ"], answer:["インド","中国","アメリカ"], comment:"" },
     { title:"綿花の輸出量", year:"2021", choices:["アメリカ","ブラジル","インド","オーストラリア","ギリシャ","ベナン","トルコ","ウズベキスタン","カメルーン","ペルー"], answer:["アメリカ","ブラジル","インド"], comment:"" },
     { title:"綿花の輸入量", year:"2021", choices:["中国","ベトナム","バングラデシュ","トルコ","パキスタン","インドネシア","タイ","メキシコ","イタリア","韓国"], answer:["中国","ベトナム","バングラデシュ"], comment:"" },
@@ -190,13 +190,13 @@ const quizSets = {
     { title:"天然ゴムの生産量", year:"2021", choices:["タイ","インドネシア","ベトナム","マレーシア","コートジボワール","中国","インド","フィリピン","カンボジア","ラオス"], answer:["タイ","インドネシア","ベトナム"], comment:"" },
     { title:"漁獲量", year:"2021", choices:["中国","インドネシア","ペルー","インド","ロシア","ベトナム","日本","チリ","アメリカ","ノルウェー"], answer:["中国","インドネシア","ペルー"], comment:"" },
     { title:"養殖業生産量", year:"2021", choices:["中国","インドネシア","インド","ベトナム","バングラデシュ","ノルウェー","エジプト","チリ","タイ","日本"], answer:["中国","インドネシア","インド"], comment:"" },
-    { title:"漁獲＋養殖生産量", year:"2021", choices:["中国","インドネシア","インド","ベトナム","ペルー","ロシア","日本","アメリカ","チリ","ノルウェー"], answer:["中国","インドネシア","インド"], comment:"" },
+    { title:"漁獲量と養殖業生産量の合計", year:"2021", choices:["中国","インドネシア","インド","ベトナム","ペルー","ロシア","日本","アメリカ","チリ","ノルウェー"], answer:["中国","インドネシア","インド"], comment:"" },
     { title:"水産物の輸出量", year:"2021", choices:["中国","ノルウェー","ベトナム","インド","チリ","アメリカ","ロシア","カナダ","タイ","オランダ"], answer:["中国","ノルウェー","ベトナム"], comment:"" },
     { title:"水産物の輸入量", year:"2021", choices:["アメリカ","中国","日本","スペイン","ドイツ","フランス","イタリア","韓国","イギリス","カナダ"], answer:["アメリカ","中国","日本"], comment:"" },
     { title:"日本の魚種別漁獲量", year:"2021", choices:["いわし類","さば類","ほたて貝","さんま","まぐろ類","かれい類","ぶり類","たら類","かつお","さけ"], answer:["いわし類","さば類","ほたて貝"], comment:"" },
     { title:"日本の魚介類の輸入先", year:"2022", choices:["チリ","アメリカ","ロシア","ノルウェー","ベトナム","インドネシア","中国","カナダ","タイ","ニュージーランド"], answer:["チリ","アメリカ","ロシア"], comment:"" },
     { title:"日本のえびの輸入先", year:"2022", choices:["ベトナム","インド","インドネシア","エクアドル","タイ","マレーシア","アルゼンチン","中国","メキシコ","フィリピン"], answer:["ベトナム","インド","インドネシア"], comment:"" },
-    { title:"日本の魚介類の品目別輸入", year:"2022", choices:["さけ・ます","まぐろ","えび","かに","にしん","かれい類","たら類","ぶり類","貝類","うなぎ"], answer:["さけ・ます","まぐろ","えび"], comment:"" }
+    { title:"日本の魚介類の輸入品目", year:"2022", choices:["さけ・ます","まぐろ","えび","かに","にしん","かれい類","たら類","ぶり類","貝類","うなぎ"], answer:["さけ・ます","まぐろ","えび"], comment:"" }
   ],
   energy: [
     { title:"石炭の埋蔵量", year:"2020", choices:["アメリカ","中国","インド","オーストラリア","ロシア","南アフリカ","カナダ","ポーランド","インドネシア","ウクライナ"], answer:["アメリカ","中国","インド"], comment:"" },
@@ -413,18 +413,47 @@ function checkAnswer(){
   document.querySelector('.card').appendChild(newBtn);
 }
 
-document.querySelectorAll('.tab').forEach(tab=>{
-  tab.addEventListener('click',()=>{
-    const genre = tab.dataset.genre;
-    if(currentGenre===genre && currentQuizPerGenre[genre]) return;
-    currentGenre=genre;
-    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-    tab.classList.add('active');
-    newQuiz();
-  });
-});
+/* タブの動的生成と問題数の表示 */
+function renderTabs() {
+    const tabsContainer = document.querySelector('.tabs');
+    tabsContainer.innerHTML = '';
+    
+    const genreMap = {
+        'agri': '農林水産業',
+        'energy': 'エネルギー・鉱工業',
+        'other': 'その他'
+    };
 
-document.querySelector('.tab[data-genre="'+currentGenre+'"]').classList.add('active');
+    for (const [genre, title] of Object.entries(genreMap)) {
+        const count = quizSets[genre] ? quizSets[genre].length : 0;
+        const tab = document.createElement('div');
+        tab.className = 'tab';
+        if (genre === 'energy') {
+            tab.classList.add('energy');
+        }
+        tab.dataset.genre = genre;
+        // カテゴリ名と問題数を改行で繋いで表示
+        tab.innerHTML = `${title}<br>(全${count}問)`;
+
+        tab.addEventListener('click', () => {
+            if (currentGenre === genre && currentQuizPerGenre[genre]) return;
+            currentGenre = genre;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            newQuiz();
+        });
+        tabsContainer.appendChild(tab);
+    }
+    
+    // 初期タブのアクティブ化
+    const initialTab = document.querySelector('.tab[data-genre="' + currentGenre + '"]');
+    if (initialTab) {
+        initialTab.classList.add('active');
+    }
+}
+
+// 既存のコードの末尾にこの関数呼び出しを挿入
+renderTabs();
 newQuiz();
 
 /* ここから概要ポップアップの追加JS */
