@@ -413,47 +413,18 @@ function checkAnswer(){
   document.querySelector('.card').appendChild(newBtn);
 }
 
-/* タブの動的生成と問題数の表示 */
-function renderTabs() {
-    const tabsContainer = document.querySelector('.tabs');
-    tabsContainer.innerHTML = '';
-    
-    const genreMap = {
-        'agri': '農林水産業',
-        'energy': 'エネルギー・鉱工業',
-        'other': 'その他'
-    };
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    const genre = tab.dataset.genre;
+    if(currentGenre===genre && currentQuizPerGenre[genre]) return;
+    currentGenre=genre;
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    newQuiz();
+  });
+});
 
-    for (const [genre, title] of Object.entries(genreMap)) {
-        const count = quizSets[genre] ? quizSets[genre].length : 0;
-        const tab = document.createElement('div');
-        tab.className = 'tab';
-        if (genre === 'energy') {
-            tab.classList.add('energy');
-        }
-        tab.dataset.genre = genre;
-        // カテゴリ名と問題数を改行で繋いで表示
-        tab.innerHTML = `${title}<br>(全${count}問)`;
-
-        tab.addEventListener('click', () => {
-            if (currentGenre === genre && currentQuizPerGenre[genre]) return;
-            currentGenre = genre;
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            newQuiz();
-        });
-        tabsContainer.appendChild(tab);
-    }
-    
-    // 初期タブのアクティブ化
-    const initialTab = document.querySelector('.tab[data-genre="' + currentGenre + '"]');
-    if (initialTab) {
-        initialTab.classList.add('active');
-    }
-}
-
-// 既存のコードの末尾にこの関数呼び出しを挿入
-renderTabs();
+document.querySelector('.tab[data-genre="'+currentGenre+'"]').classList.add('active');
 newQuiz();
 
 /* ここから概要ポップアップの追加JS */
