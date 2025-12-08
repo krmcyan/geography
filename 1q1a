@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>一問一答</title>
+  <style>
+    :root{
+      --bg:#f5ffe8;
+      --accent:#b7e27d;
+      --accent-2:#d5f2a3;
+      --text:#26391a;
+      --card:#ffffff;
+      --choice:#f1ffd3;
+    }
+    *{box-sizing:border-box}
+    body {
+      font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing:antialiased;
+    }
+    header {
+      background: var(--accent);
+      padding: 18px 12px;
+      text-align: center;
+      font-size: 1.6rem;
+      font-weight: 700;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.05) inset;
+    }
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin: 18px 12px;
+    }
+    .tab-btn {
+      padding: 10px 14px;
+      background: var(--accent-2);
+      border-radius: 10px;
+      cursor: pointer;
+      border: none;
+      font-size: 1rem;
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+    .tab-btn:hover{ transform: translateY(-2px); }
+    .tab-btn.active{ box-shadow: 0 6px 14px rgba(39,79,19,0.12); }
+
+    #question-box {
+      max-width: 840px;
+      margin: 10px auto 40px;
+      background: var(--card);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(10,20,10,0.06);
+      min-height: 160px;
+    }
+    h2{ margin: 6px 0 12px; font-size: 1.25rem }
+
+    .choices-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 8px; }
+    .choice {
+      padding: 10px;
+      background: var(--choice);
+      border-radius: 8px;
+      cursor: pointer;
+      border: 1px solid #bddd8c;
+      text-align: center;
+      font-size: 0.95rem;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform .08s ease, box-shadow .08s ease;
+    }
+    .choice:hover{ transform: translateY(-3px); }
+
+    #result{ margin-top: 14px; font-size: 1.05rem; font-weight: 700 }
+    #next-btn{
+      margin-top: 14px;
+      padding: 8px 14px;
+      font-size: 0.95rem;
+      border: none;
+      background: var(--accent);
+      border-radius: 10px;
+      cursor: pointer;
+      display: none;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+      width: fit-content;
+    }
+
+    .meta{ font-size: .9rem; color: #53703a; margin-top:8px }
+    .notice{ text-align:center; color:#48632a }
+
+    @media (max-width:720px){
+      .choices-container{ grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <header>まとめておぼえる一問一答</header>
+
+  <div style="text-align:center; margin:18px 12px;">
+  <select id="genre-select" style="padding:10px; font-size:1rem; background:var(--accent-2); border-radius:10px; border:none;">
+    <option value="" disabled selected>ジャンルを選択</option>
+    <option value="religion">宗教</option>
+    <option value="language">言語</option>
+  </select>
+</div>
+
+  <div id="question-box">
+    <div class="notice">ジャンルを選んでください</div>
+  </div>
+
+  <script>
+    // --- data ---
+    const data = {
+      religion: [
+        { q: "マレーシアの64%を占める主な宗教は？", choices: ["プロテスタント", "東方正教会", "カトリック", "イスラーム", "ヒンドゥー教", "仏教", "ユダヤ教", "ラマ教", "自然宗教", "無宗教/選択肢無し"], answer: 3, comment: "割合は少ないですが、2位は仏教です" },
+        { q: "ベトナムの64%を占める主な宗教は？", choices: ["プロテスタント", "東方正教会", "カトリック", "イスラーム", "ヒンドゥー教", "仏教", "ユダヤ教", "ラマ教", "自然宗教", "無宗教/選択肢無し"], answer: 9, comment: "無宗教が8割以上を占めます" }
+      ],
+      language: [
+        { q: "ベルギーの北西部で使われている主な言語は？", choices: ["スペイン語", "英語", "ドイツ語", "ポルトガル語", "ロシア語", "トルコ語", "アラビア語", "ワロン語", "フラマン語", "選択肢無し"], answer: 8, comment: "オランダ語系のフラマン語が用いられています。首都ブリュッセルではフランス語系のワロン語も用いられています" },
+        { q: "ベルギーの南東部で使われている主な言語は？", choices: ["スペイン語", "英語", "ドイツ語", "ポルトガル語", "ロシア語", "トルコ語", "アラビア語", "ワロン語", "フラマン語", "選択肢無し"], answer: 7, comment: "フランス語系のワロン語が用いられています。首都ブリュッセルではオランダ語系のフラマン語も用いられています" },
+        { q: "ベルギーの東部で使われている主な言語は？", choices: ["スペイン語", "英語", "ドイツ語", "ポルトガル語", "ロシア語", "トルコ語", "アラビア語", "ワロン語", "フラマン語", "選択肢無し"], answer: 2, comment: "ドイツがすぐ東に位置します。ベルギーの北西部ではフラマン語が、南東部ではワロン語が用いられています" }
+      ]
+    };
+
+    // --- state ---
+    let currentGenre = null;
+let lastQuestion = null;
+    let currentQuestion = null;
+
+    // --- helpers ---
+    function el(tag, props = {}, ...children){
+      const e = document.createElement(tag);
+      Object.entries(props).forEach(([k,v])=>{ if(k==='class') e.className = v; else if(k==='html') e.innerHTML = v; else e.setAttribute(k,v); });
+      children.forEach(c=>{ if(typeof c === 'string') e.appendChild(document.createTextNode(c)); else if(c) e.appendChild(c); });
+      return e;
+    }
+
+    function setupGenreSelect(){
+  const sel = document.getElementById('genre-select');
+  sel.addEventListener('change', ()=> setGenre(sel.value));
+}
+
+function genreLabel(g){
+      const map = { religion:'宗教', language:'言語' };
+      return map[g] || g;
+    }
+
+    // Expose setGenre in case external code expects it (robustness)
+    window.setGenre = function setGenre(g, btnEl){
+      currentGenre = g;
+      // update active styling
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      if(btnEl) btnEl.classList.add('active');
+      loadQuestion();
+    }
+
+    function loadQuestion(){
+      const box = document.getElementById('question-box');
+      const list = data[currentGenre];
+      if(!list){ box.innerHTML = "<div class='notice'>ジャンルを選んでください</div>"; return; }
+
+      let q = null;
+do{
+  q = list[Math.floor(Math.random()*list.length)];
+}while(list.length > 1 && q === lastQuestion);
+currentQuestion = q;
+lastQuestion = q;
+
+      // build DOM
+      box.innerHTML = '';
+      box.appendChild(el('h2',{}, currentQuestion.q));
+
+      const choicesContainer = el('div',{class:'choices-container'});
+      // shuffle choices while keeping track of correct index
+const indices = currentQuestion.choices.map((_, i) => i);
+for (let k = indices.length - 1; k > 0; k--) {
+  const r = Math.floor(Math.random() * (k + 1));
+  [indices[k], indices[r]] = [indices[r], indices[k]];
+}
+const shuffledChoices = indices.map(i => currentQuestion.choices[i]);
+const correctIndex = indices.indexOf(currentQuestion.answer);
+
+      currentQuestion._shuffled = shuffledChoices;
+      currentQuestion._correct = correctIndex;
+
+      shuffledChoices.forEach((c, i) => {
+        const btn = el('div', {class:'choice'}, c);
+        btn.onclick = () => checkAnswer(i);
+        choicesContainer.appendChild(btn);
+      });
+      box.appendChild(choicesContainer);
+
+      const result = el('div',{id:'result'});
+      box.appendChild(result);
+
+      // comment (one-line phrase for each question) - appears between result and next button
+      const comment = el('div',{id:'comment', class:'meta'});
+      box.appendChild(comment);
+
+      const nextBtn = el('button',{id:'next-btn'}, '次の問題へ');
+      nextBtn.addEventListener('click', ()=> loadQuestion());
+      box.appendChild(nextBtn);
+    }
+
+    function checkAnswer(i){
+      const result = document.getElementById('result');
+      const comment = document.getElementById('comment');
+      const nextBtn = document.getElementById('next-btn');
+      if(!currentQuestion) return;
+
+      if(i === currentQuestion._correct){
+        result.innerHTML = "<span style='font-size:1.3rem'>⭕</span> 正解：" + currentQuestion._shuffled[currentQuestion._correct];
+        result.style.color = 'green';
+      } else {
+        result.innerHTML = "<div><span style='font-size:1.3rem'>❌</span> あなたの解答：" + currentQuestion._shuffled[i] + "</div>"
+          + "<div><span style='font-size:1.3rem'>⭕</span> 正解：" + currentQuestion._shuffled[currentQuestion._correct] + "</div>";
+        result.style.color = 'red';
+      }
+
+      // show the question's short comment
+      if(comment) comment.textContent = currentQuestion.comment || '';
+
+      // hide all choices
+      document.querySelectorAll('.choice').forEach(btn => btn.style.display = 'none');
+
+      // show next (centered via CSS)
+      if(nextBtn) nextBtn.style.display = 'block';
+    }
+
+    // initialize
+    document.addEventListener('DOMContentLoaded', ()=>{
+      setupGenreSelect();
+    });
+  </script>
+</body>
+</html>
