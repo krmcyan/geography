@@ -404,7 +404,7 @@ function checkAnswer(){
     const ok=userAnswers[i]===correct[i];
     const icon=ok?'⭕':'❌';
     const color=ok?'#28a745':'#d00';
-    html+=`${icon} ${i+1}位 → <span style='color:${color}'>あなた: ${userAnswers[i]||'-'} / 正解: ${correct[i]}</span><br>`;
+    html+=`${icon} ${i+1}位 → <span style='color:${color}'> ${userAnswers[i]||'-'} / ${correct[i]}</span><br>`;
   }
   result.innerHTML=html;
   document.querySelector('.card').appendChild(result);
